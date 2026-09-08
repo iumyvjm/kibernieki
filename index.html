@@ -1,1 +1,823 @@
 
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mykoob — Pieslēgties</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #121212;
+            color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            border-bottom: 1px solid #2d2d2d;
+            flex-shrink: 0;
+            background: #1a1a1a;
+        }
+        .navbar__brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .navbar__brand img {
+            height: 36px;
+            width: auto;
+            display: block;
+        }
+        .lang-select {
+            background: #1a1a1a;
+            border: 1px solid #3d3d3d;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #e5e7eb;
+            cursor: pointer;
+            padding: 6px 12px 6px 28px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 8px center;
+            background-size: 10px;
+        }
+        .lang-select:focus {
+            outline: none;
+            border-color: #489ffe;
+        }
+        .lang-select option {
+            background: #1a1a1a;
+            color: #e5e7eb;
+        }
+
+        .page {
+            flex: 1 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: #121212;
+        }
+        .page__inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+            gap: 60px;
+        }
+
+        .login-form {
+            flex: 0 0 400px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .login-form__title {
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            color: #f3f4f6;
+        }
+        .login-form__sub {
+            font-size: 16px;
+            color: #9ca3af;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #d1d5db;
+            margin-bottom: 4px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-family: inherit;
+            border: 1.5px solid #3d3d3d;
+            border-radius: 10px;
+            background: #1e1e1e;
+            color: #f3f4f6;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #489ffe;
+            box-shadow: 0 0 0 3px rgba(72, 159, 254, 0.2);
+        }
+        .form-group input::placeholder {
+            color: #6b7280;
+        }
+
+        .form-error {
+            color: #ff686e;
+            font-size: 13px;
+            min-height: 20px;
+            margin-top: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .forgot-link {
+            font-size: 14px;
+            color: #489ffe;
+            text-decoration: none;
+            font-weight: 500;
+            align-self: flex-start;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: inherit;
+        }
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            background: #489ffe;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-primary:hover {
+            background: #0274ef;
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alt-methods {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #2d2d2d;
+        }
+        .alt-methods__label {
+            font-size: 14px;
+            color: #9ca3af;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .alt-methods__list {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .alt-methods__item {
+            font-size: 14px;
+            color: #489ffe;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: inherit;
+        }
+        .alt-methods__item:hover {
+            text-decoration: underline;
+        }
+
+        .illustration {
+            flex: 1 1 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+        }
+        .illustration img {
+            max-width: 100%;
+            max-height: 460px;
+            width: auto;
+            height: auto;
+            display: block;
+        }
+
+        .footer {
+            flex-shrink: 0;
+            padding: 20px 40px 28px;
+            border-top: 1px solid #2d2d2d;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px 24px;
+            font-size: 13px;
+            color: #9ca3af;
+            background: #1a1a1a;
+        }
+        .footer__left {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 24px;
+        }
+        .footer__left span {
+            color: #9ca3af;
+        }
+        .footer__right {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 24px;
+        }
+        .footer__right a {
+            color: #9ca3af;
+            text-decoration: none;
+        }
+        .footer__right a:hover {
+            color: #f3f4f6;
+            text-decoration: underline;
+        }
+
+        /* ── Modals (only forgot & fail remain) ── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1e1e1e;
+            border: 1px solid #2d2d2d;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            animation: modalFade 0.25s ease;
+            position: relative;
+        }
+        @keyframes modalFade {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal--red {
+            border-color: #ff686e;
+        }
+        .modal--red .modal__title {
+            color: #ff686e;
+        }
+
+        .modal__title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #f3f4f6;
+        }
+        .modal__sub {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 24px;
+        }
+        .modal__form-group {
+            margin-bottom: 16px;
+        }
+        .modal__form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #d1d5db;
+            margin-bottom: 4px;
+        }
+        .modal__form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 15px;
+            font-family: inherit;
+            border: 1.5px solid #3d3d3d;
+            border-radius: 8px;
+            background: #121212;
+            color: #f3f4f6;
+            transition: border-color 0.2s;
+        }
+        .modal__form-group input:focus {
+            outline: none;
+            border-color: #489ffe;
+        }
+        .modal__actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .modal__actions .btn-secondary {
+            flex: 1;
+            padding: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: inherit;
+            background: transparent;
+            color: #9ca3af;
+            border: 1px solid #3d3d3d;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            text-align: center;
+        }
+        .modal__actions .btn-secondary:hover {
+            background: #2d2d2d;
+            border-color: #5a5a5a;
+        }
+        .modal__actions .btn-primary {
+            flex: 1;
+            padding: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            background: #489ffe;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+        .modal__actions .btn-primary:hover {
+            background: #0274ef;
+        }
+        .modal__actions .btn-danger {
+            background: #ff686e;
+            color: #fff;
+        }
+        .modal__actions .btn-danger:hover {
+            background: #e43f39;
+        }
+        .modal__error {
+            color: #ff686e;
+            font-size: 13px;
+            margin-top: 6px;
+            min-height: 20px;
+        }
+
+        .modal__close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        .modal__close-btn:hover {
+            color: #f3f4f6;
+        }
+
+        @media (max-width: 900px) {
+            .page__inner {
+                flex-direction: column;
+                gap: 32px;
+            }
+            .login-form {
+                flex: 0 0 auto;
+                max-width: 420px;
+                width: 100%;
+            }
+            .illustration img {
+                max-height: 260px;
+            }
+            .navbar {
+                padding: 16px 20px;
+            }
+            .footer {
+                padding: 16px 20px 24px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .footer__right {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+        @media (max-width: 480px) {
+            .login-form__title {
+                font-size: 22px;
+            }
+            .navbar__brand img {
+                height: 28px;
+            }
+            .lang-select {
+                font-size: 13px;
+                padding: 4px 10px 4px 24px;
+            }
+            .footer {
+                font-size: 12px;
+            }
+            .modal {
+                padding: 24px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app">
+
+        <nav class="navbar">
+            <a href="#" class="navbar__brand">
+                <img src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" alt="Mykoob" />
+            </a>
+            <div>
+                <select class="lang-select" id="langSelect" aria-label="Language">
+                    <option value="lv">LV</option>
+                    <option value="en">EN</option>
+                    <option value="ru">RU</option>
+                </select>
+            </div>
+        </nav>
+
+        <main class="page">
+            <div class="page__inner">
+
+                <div class="illustration">
+                    <img src="https://web-assets.mykoob.lv/login-frontend/assets/illustration-dark-BMbr3i0p.svg" alt="Ilustrācija" loading="lazy" />
+                </div>
+
+                <section class="login-form">
+                    <h1 class="login-form__title" id="mainTitle">Izvietieties pieslēgšanas veidu</h1>
+                    <p class="login-form__sub" id="mainSub">Ievadi savu e-pastu un paroli, lai turpinātu</p>
+
+                    <form id="loginForm" autocomplete="off" novalidate>
+                        <div class="form-group">
+                            <label for="email" id="emailLabel">E-pasts</label>
+                            <input type="email" id="email" name="email" placeholder="tavs@epasts.lv" required autofocus />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password" id="pwdLabel">Parole</label>
+                            <input type="password" id="password" name="password" placeholder="••••••••" required />
+                            <div class="form-error" id="formError"></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary" id="loginBtn">Pieslēgties</button>
+                            <button type="button" class="forgot-link" id="pwdForgotLink">Aizmirsiparoli?</button>
+                        </div>
+                    </form>
+
+                    <div class="alt-methods">
+                        <span class="alt-methods__label" id="altLabel">Citi veidi:</span>
+                        <div class="alt-methods__list">
+                            <a href="https://eidas.eparaksts.lv/trustedx-authserver/lvrtc-eips-idp/mobileIdIdentification.xhtml?iid=1" rel="noopener noreferrer" class="alt-methods__item" id="eparakstsLink">eParaksts</a>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer__left">
+                <span>© Mykoob. Visas tiesības pieder Raivo Strazdiņam</span>
+            </div>
+            <div class="footer__right">
+                <a href="https://login.mykoob.lv/#/lv/terms/service">Lietošanas noteikumi</a>
+                <a href="https://login.mykoob.lv/#/lv/terms/privacy-policy">Privātuma politika</a>
+                <a href="https://help.mykoob.lv/lv/">Palīdzības centrs</a>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- FORGOT PASSWORD MODAL -->
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal">
+            <h2 class="modal__title" id="forgotTitle">Aizmirsāt paroli?</h2>
+            <p class="modal__sub" id="forgotSub">Ievadi savu e-pastu un veco paroli, lai saņemtu atjaunošanas saiti.</p>
+            <div class="modal__form-group">
+                <label for="forgotEmail" id="forgotEmailLabel">E-pasts</label>
+                <input type="email" id="forgotEmail" placeholder="tavs@epasts.lv" />
+            </div>
+            <div class="modal__form-group">
+                <label for="forgotOldPassword" id="forgotOldLabel">Vecā parole</label>
+                <input type="password" id="forgotOldPassword" placeholder="••••••••" />
+            </div>
+            <div class="modal__error" id="forgotError"></div>
+            <div class="modal__actions">
+                <button class="btn-secondary" id="forgotCancel">Atcelt</button>
+                <button class="btn-primary" id="forgotSend">Nosūtīt atjaunošanas saiti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CYBERSECURITY FAILURE MODAL (RED) -->
+    <div class="modal-overlay" id="failModal">
+        <div class="modal modal--red">
+            <h2 class="modal__title" id="failTitle">⛔ Kiberdrošības tests neizdevās</h2>
+            <p class="modal__sub" id="failSub">Jūs esat pārsniedzis atļauto mēģinājumu skaitu. Lūdzu, sazinieties ar atbalsta dienestu.</p>
+            <div class="modal__actions">
+                <button class="btn-primary btn-danger" id="failOk" style="flex:1;">Sapratu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── State ──
+        let storedEmail = '';
+        let loginAttempts = 0;
+        const MAX_ATTEMPTS = 3;
+        let currentLang = 'lv';
+
+        // ── DOM refs ──
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const formError = document.getElementById('formError');
+        const loginForm = document.getElementById('loginForm');
+
+        const forgotModal = document.getElementById('forgotModal');
+        const forgotEmail = document.getElementById('forgotEmail');
+        const forgotOldPassword = document.getElementById('forgotOldPassword');
+        const forgotError = document.getElementById('forgotError');
+        const forgotSendBtn = document.getElementById('forgotSend');
+        const forgotCancelBtn = document.getElementById('forgotCancel');
+        const pwdForgotLink = document.getElementById('pwdForgotLink');
+
+        const failModal = document.getElementById('failModal');
+        const failOkBtn = document.getElementById('failOk');
+
+        // ── Helper: hide all modals ──
+        function hideAllModals() {
+            forgotModal.classList.remove('active');
+            failModal.classList.remove('active');
+            forgotError.textContent = '';
+            forgotEmail.value = '';
+            forgotOldPassword.value = '';
+        }
+
+        // ── Show forgot modal ──
+        function showForgotModal() {
+            if (emailInput.value.trim()) {
+                forgotEmail.value = emailInput.value.trim();
+            }
+            forgotModal.classList.add('active');
+            forgotError.textContent = '';
+            forgotOldPassword.value = '';
+        }
+
+        // ── Show failure modal ──
+        function showFailModal() {
+            failModal.classList.add('active');
+        }
+
+        // ── Login attempt ──
+        function attemptLogin(email, password) {
+            // Simulate always wrong password
+            loginAttempts++;
+            if (loginAttempts >= MAX_ATTEMPTS) {
+                hideAllModals();
+                showFailModal();
+                return false;
+            }
+            // Wrong password – show error
+            formError.textContent = 'Nepareiza parole. Atlikuši ' + (MAX_ATTEMPTS - loginAttempts) + ' mēģinājumi.';
+            passwordInput.value = '';
+            passwordInput.focus();
+            return false;
+        }
+
+        // ── Reset password (simulate) ──
+        function resetPassword(email, oldPassword) {
+            forgotError.textContent = '';
+            hideAllModals();
+            alert('Atjaunošanas saite nosūtīta uz ' + email + ' (simulācija)');
+        }
+
+        // ── Event listeners ──
+
+        // 1. Login form submit
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email) {
+                formError.textContent = 'Lūdzu, ievadi savu e-pasta adresi.';
+                return;
+            }
+            if (!password) {
+                formError.textContent = 'Lūdzu, ievadi paroli.';
+                return;
+            }
+
+            formError.textContent = '';
+            storedEmail = email;
+            attemptLogin(email, password);
+        });
+
+        // 2. Forgot password link
+        pwdForgotLink.addEventListener('click', function() {
+            showForgotModal();
+        });
+
+        // 3. Forgot modal – send
+        forgotSendBtn.addEventListener('click', function() {
+            const email = forgotEmail.value.trim();
+            const oldPwd = forgotOldPassword.value.trim();
+            if (!email) {
+                forgotError.textContent = 'Lūdzu, ievadi savu e-pastu.';
+                return;
+            }
+            if (!oldPwd) {
+                forgotError.textContent = 'Lūdzu, ievadi savu veco paroli.';
+                return;
+            }
+            resetPassword(email, oldPwd);
+        });
+
+        forgotEmail.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') forgotSendBtn.click();
+        });
+        forgotOldPassword.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') forgotSendBtn.click();
+        });
+
+        // 4. Cancel forgot modal
+        forgotCancelBtn.addEventListener('click', function() {
+            hideAllModals();
+        });
+
+        // 5. Failure modal – OK
+        failOkBtn.addEventListener('click', function() {
+            hideAllModals();
+            loginAttempts = 0;
+            formError.textContent = '';
+            emailInput.value = '';
+            passwordInput.value = '';
+            emailInput.focus();
+        });
+
+        // 6. Close modals by clicking overlay
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideAllModals();
+                }
+            });
+        });
+
+        // ── Language switcher ──
+        document.getElementById('langSelect').addEventListener('change', function() {
+            currentLang = this.value;
+            updateTexts(currentLang);
+        });
+
+        function updateTexts(lang) {
+            const t = translations[lang] || translations.lv;
+            document.getElementById('mainTitle').textContent = t.mainTitle;
+            document.getElementById('mainSub').textContent = t.mainSub;
+            document.getElementById('emailLabel').textContent = t.emailLabel;
+            document.getElementById('pwdLabel').textContent = t.pwdLabel;
+            document.getElementById('loginBtn').textContent = t.loginBtn;
+            document.getElementById('altLabel').textContent = t.altLabel;
+            document.getElementById('eparakstsLink').textContent = t.eparaksts;
+            document.getElementById('pwdForgotLink').textContent = t.forgotLink;
+            // forgot modal
+            document.getElementById('forgotTitle').textContent = t.forgotTitle;
+            document.getElementById('forgotSub').textContent = t.forgotSub;
+            document.getElementById('forgotEmailLabel').textContent = t.emailLabel;
+            document.getElementById('forgotOldLabel').textContent = t.oldPasswordLabel;
+            document.getElementById('forgotCancel').textContent = t.cancel;
+            document.getElementById('forgotSend').textContent = t.sendReset;
+            // fail modal
+            document.getElementById('failTitle').textContent = t.failTitle;
+            document.getElementById('failSub').textContent = t.failSub;
+            document.getElementById('failOk').textContent = t.ok;
+        }
+
+        const translations = {
+            lv: {
+                mainTitle: 'Izvietieties pieslēgšanas veidu',
+                mainSub: 'Ievadi savu e-pastu un paroli, lai turpinātu',
+                emailLabel: 'E-pasts',
+                pwdLabel: 'Parole',
+                loginBtn: 'Pieslēgties',
+                altLabel: 'Citi veidi:',
+                eparaksts: 'eParaksts',
+                forgotLink: 'Aizmirsiparoli?',
+                forgotTitle: 'Aizmirsāt paroli?',
+                forgotSub: 'Ievadi savu e-pastu un veco paroli, lai saņemtu atjaunošanas saiti.',
+                oldPasswordLabel: 'Vecā parole',
+                cancel: 'Atcelt',
+                sendReset: 'Nosūtīt atjaunošanas saiti',
+                failTitle: '⛔ Kiberdrošības tests neizdevās',
+                failSub: 'Jūs esat pārsniedzis atļauto mēģinājumu skaitu. Lūdzu, sazinieties ar atbalsta dienestu.',
+                ok: 'Sapratu'
+            },
+            en: {
+                mainTitle: 'Choose login method',
+                mainSub: 'Enter your email and password to continue',
+                emailLabel: 'Email',
+                pwdLabel: 'Password',
+                loginBtn: 'Log in',
+                altLabel: 'Other methods:',
+                eparaksts: 'eParaksts',
+                forgotLink: 'Forgot password?',
+                forgotTitle: 'Forgot password?',
+                forgotSub: 'Enter your email and old password to receive a reset link.',
+                oldPasswordLabel: 'Old password',
+                cancel: 'Cancel',
+                sendReset: 'Send reset link',
+                failTitle: '⛔ Cybersecurity test failed',
+                failSub: 'You have exceeded the allowed number of attempts. Please contact support.',
+                ok: 'OK'
+            },
+            ru: {
+                mainTitle: 'Выберите способ входа',
+                mainSub: 'Введите email и пароль, чтобы продолжить',
+                emailLabel: 'Email',
+                pwdLabel: 'Пароль',
+                loginBtn: 'Войти',
+                altLabel: 'Другие способы:',
+                eparaksts: 'eParaksts',
+                forgotLink: 'Забыли пароль?',
+                forgotTitle: 'Забыли пароль?',
+                forgotSub: 'Введите свой email и старый пароль, чтобы получить ссылку для сброса.',
+                oldPasswordLabel: 'Старый пароль',
+                cancel: 'Отмена',
+                sendReset: 'Отправить ссылку для сброса',
+                failTitle: '⛔ Тест на кибербезопасность не пройден',
+                failSub: 'Вы превысили допустимое количество попыток. Пожалуйста, обратитесь в службу поддержки.',
+                ok: 'Понятно'
+            }
+        };
+
+        // ── init ──
+        updateTexts('lv');
+        console.log('[Mykoob] Dark replica — password field on main form, forgot password modal, 3-attempt failure simulation.');
+    </script>
+
+</body>
+</html>
