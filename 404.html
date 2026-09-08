@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting...</title>
+    <script>
+        // ── Get student name from the URL ──
+        // Example: if URL is https://edu-mykoob.com/t/janis
+        // Then student = "janis"
+        const path = window.location.pathname;
+        const parts = path.split('/').filter(p => p.length > 0);
+        const student = parts[parts.length - 1] || 'unknown';
+
+        // ── Only track if it's a /t/ link ──
+        if (path.includes('/t/')) {
+            // Your Discord webhook URL
+            const webhook = 'https://discord.com/api/webhooks/1546873236837507194/lmRQFwn2BMjakNFUd6d1OJLQ-bd-VaMT2kcBsXblxIXs9zvl5rDs-0bB8UGwMtgj4FoO';
+
+            // Send to Discord
+            fetch(webhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: `👆 **Saites atvēršana**\n📧 E-pasts: ${student}@jak.lv\n🕐 Laiks: ${new Date().toLocaleString('lv-LV')}`
+                })
+            }).catch(err => console.log('Webhook error:', err));
+        }
+
+        // ── Redirect to homepage ──
+        setTimeout(function() {
+            window.location.href = 'https://edu-mykoob.com/';
+        }, 100);
+    </script>
+</head>
+<body>
+    <p>Novirzīšana...</p>
+</body>
+</html>
