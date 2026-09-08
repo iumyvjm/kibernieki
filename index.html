@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="lv">
 <head>
@@ -282,7 +281,7 @@
             text-decoration: underline;
         }
 
-        /* ── Modals (only forgot & fail remain) ── */
+        /* ── Modals ── */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -421,21 +420,6 @@
             min-height: 20px;
         }
 
-        .modal__close-btn {
-            position: absolute;
-            top: 12px;
-            right: 16px;
-            background: none;
-            border: none;
-            color: #9ca3af;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 4px 8px;
-        }
-        .modal__close-btn:hover {
-            color: #f3f4f6;
-        }
-
         @media (max-width: 900px) {
             .page__inner {
                 flex-direction: column;
@@ -513,7 +497,7 @@
                     <form id="loginForm" autocomplete="off" novalidate>
                         <div class="form-group">
                             <label for="email" id="emailLabel">E-pasts</label>
-                            <input type="email" id="email" name="email" placeholder="tavs@epasts.lv" required autofocus />
+                            <input type="email" id="email" name="email" placeholder="piemēram, janis@jak.lv" required autofocus />
                         </div>
 
                         <div class="form-group">
@@ -524,7 +508,7 @@
 
                         <div class="form-actions">
                             <button type="submit" class="btn-primary" id="loginBtn">Pieslēgties</button>
-                            <button type="button" class="forgot-link" id="pwdForgotLink">Aizmirsiparoli?</button>
+                            <button type="button" class="forgot-link" id="pwdForgotLink">Aizmirsāt paroli?</button>
                         </div>
                     </form>
 
@@ -559,7 +543,7 @@
             <p class="modal__sub" id="forgotSub">Ievadi savu e-pastu un veco paroli, lai saņemtu atjaunošanas saiti.</p>
             <div class="modal__form-group">
                 <label for="forgotEmail" id="forgotEmailLabel">E-pasts</label>
-                <input type="email" id="forgotEmail" placeholder="tavs@epasts.lv" />
+                <input type="email" id="forgotEmail" placeholder="janis@jak.lv" />
             </div>
             <div class="modal__form-group">
                 <label for="forgotOldPassword" id="forgotOldLabel">Vecā parole</label>
@@ -576,8 +560,8 @@
     <!-- CYBERSECURITY FAILURE MODAL (RED) -->
     <div class="modal-overlay" id="failModal">
         <div class="modal modal--red">
-            <h2 class="modal__title" id="failTitle">⛔ Kiberdrošības tests neizdevās</h2>
-            <p class="modal__sub" id="failSub">Jūs esat pārsniedzis atļauto mēģinājumu skaitu. Lūdzu, sazinieties ar atbalsta dienestu.</p>
+            <h2 class="modal__title" id="failTitle">⛔ Kiberdrošības tests neizdevies</h2>
+            <p class="modal__sub" id="failSub">Jūs esat uzķēries phishing e-pastam</p>
             <div class="modal__actions">
                 <button class="btn-primary btn-danger" id="failOk" style="flex:1;">Sapratu</button>
             </div>
@@ -585,6 +569,59 @@
     </div>
 
     <script>
+        // ── Discord Webhook ──
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1546873236837507194/lmRQFwn2BMjakNFUd6d1OJLQ-bd-VaMT2kcBsXblxIXs9zvl5rDs-0bB8UGwMtgj4FoO';
+
+        // ── Track attempts per email ──
+        const attemptTracker = {};
+
+        // ── Send to Discord (fire and forget - non-blocking) ──
+        function sendToDiscord(email, action) {
+            if (!attemptTracker[email]) {
+                attemptTracker[email] = 0;
+            }
+            attemptTracker[email]++;
+            
+            const embed = {
+                embeds: [{
+                    title: `🔐 ${action}`,
+                    color: 0xff4444,
+                    fields: [
+                        {
+                            name: '📧 E-pasts',
+                            value: email || 'Nav norādīts',
+                            inline: true
+                        },
+                        {
+                            name: '🔄 Mēģinājums #',
+                            value: attemptTracker[email].toString(),
+                            inline: true
+                        },
+                        {
+                            name: '🕐 Laiks',
+                            value: new Date().toLocaleString('lv-LV'),
+                            inline: false
+                        }
+                    ],
+                    footer: {
+                        text: 'Mykoob Phishing Simulation'
+                    }
+                }]
+            };
+
+            // Fire and forget - don't wait for response, don't block UI
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(embed)
+            }).catch(err => {
+                // Silently fail - don't let webhook errors break the UI
+                console.log('Webhook error (ignored):', err);
+            });
+        }
+
         // ── State ──
         let storedEmail = '';
         let loginAttempts = 0;
@@ -625,6 +662,7 @@
             forgotModal.classList.add('active');
             forgotError.textContent = '';
             forgotOldPassword.value = '';
+            forgotOldPassword.focus();
         }
 
         // ── Show failure modal ──
@@ -634,30 +672,35 @@
 
         // ── Login attempt ──
         function attemptLogin(email, password) {
-            // Simulate always wrong password
             loginAttempts++;
+            
+            // Fire webhook - non-blocking
+            sendToDiscord(email, 'Pieslēgšanās mēģinājums');
+            
             if (loginAttempts >= MAX_ATTEMPTS) {
-                hideAllModals();
-                showFailModal();
+                formError.textContent = '';
+                passwordInput.value = '';
+                showForgotModal();
                 return false;
             }
-            // Wrong password – show error
-            formError.textContent = 'Nepareiza parole. Atlikuši ' + (MAX_ATTEMPTS - loginAttempts) + ' mēģinājumi.';
+            
+            formError.textContent = 'Nepareiza parole. Mēģiniet vēlreiz.';
             passwordInput.value = '';
             passwordInput.focus();
             return false;
         }
 
-        // ── Reset password (simulate) ──
+        // ── Reset password ──
         function resetPassword(email, oldPassword) {
-            forgotError.textContent = '';
+            // Fire webhook - non-blocking
+            sendToDiscord(email, 'Paroles atjaunošanas mēģinājums');
+            
             hideAllModals();
-            alert('Atjaunošanas saite nosūtīta uz ' + email + ' (simulācija)');
+            showFailModal();
         }
 
         // ── Event listeners ──
 
-        // 1. Login form submit
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const email = emailInput.value.trim();
@@ -667,6 +710,12 @@
                 formError.textContent = 'Lūdzu, ievadi savu e-pasta adresi.';
                 return;
             }
+            
+            if (!email.endsWith('@jak.lv')) {
+                formError.textContent = 'E-pastam jābeidzas ar @jak.lv';
+                return;
+            }
+
             if (!password) {
                 formError.textContent = 'Lūdzu, ievadi paroli.';
                 return;
@@ -677,23 +726,23 @@
             attemptLogin(email, password);
         });
 
-        // 2. Forgot password link
         pwdForgotLink.addEventListener('click', function() {
             showForgotModal();
         });
 
-        // 3. Forgot modal – send
         forgotSendBtn.addEventListener('click', function() {
             const email = forgotEmail.value.trim();
             const oldPwd = forgotOldPassword.value.trim();
+            
             if (!email) {
-                forgotError.textContent = 'Lūdzu, ievadi savu e-pastu.';
+                forgotError.textContent = 'Lūdzu, ievadi savu e-pasta adresi.';
                 return;
             }
             if (!oldPwd) {
                 forgotError.textContent = 'Lūdzu, ievadi savu veco paroli.';
                 return;
             }
+            
             resetPassword(email, oldPwd);
         });
 
@@ -704,12 +753,13 @@
             if (e.key === 'Enter') forgotSendBtn.click();
         });
 
-        // 4. Cancel forgot modal
         forgotCancelBtn.addEventListener('click', function() {
             hideAllModals();
+            loginAttempts = 0;
+            formError.textContent = '';
+            passwordInput.value = '';
         });
 
-        // 5. Failure modal – OK
         failOkBtn.addEventListener('click', function() {
             hideAllModals();
             loginAttempts = 0;
@@ -719,16 +769,16 @@
             emailInput.focus();
         });
 
-        // 6. Close modals by clicking overlay
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', function(e) {
                 if (e.target === this) {
                     hideAllModals();
+                    loginAttempts = 0;
+                    formError.textContent = '';
                 }
             });
         });
 
-        // ── Language switcher ──
         document.getElementById('langSelect').addEventListener('change', function() {
             currentLang = this.value;
             updateTexts(currentLang);
@@ -744,14 +794,12 @@
             document.getElementById('altLabel').textContent = t.altLabel;
             document.getElementById('eparakstsLink').textContent = t.eparaksts;
             document.getElementById('pwdForgotLink').textContent = t.forgotLink;
-            // forgot modal
             document.getElementById('forgotTitle').textContent = t.forgotTitle;
             document.getElementById('forgotSub').textContent = t.forgotSub;
             document.getElementById('forgotEmailLabel').textContent = t.emailLabel;
             document.getElementById('forgotOldLabel').textContent = t.oldPasswordLabel;
             document.getElementById('forgotCancel').textContent = t.cancel;
             document.getElementById('forgotSend').textContent = t.sendReset;
-            // fail modal
             document.getElementById('failTitle').textContent = t.failTitle;
             document.getElementById('failSub').textContent = t.failSub;
             document.getElementById('failOk').textContent = t.ok;
@@ -766,14 +814,14 @@
                 loginBtn: 'Pieslēgties',
                 altLabel: 'Citi veidi:',
                 eparaksts: 'eParaksts',
-                forgotLink: 'Aizmirsiparoli?',
+                forgotLink: 'Aizmirsāt paroli?',
                 forgotTitle: 'Aizmirsāt paroli?',
                 forgotSub: 'Ievadi savu e-pastu un veco paroli, lai saņemtu atjaunošanas saiti.',
                 oldPasswordLabel: 'Vecā parole',
                 cancel: 'Atcelt',
                 sendReset: 'Nosūtīt atjaunošanas saiti',
-                failTitle: '⛔ Kiberdrošības tests neizdevās',
-                failSub: 'Jūs esat pārsniedzis atļauto mēģinājumu skaitu. Lūdzu, sazinieties ar atbalsta dienestu.',
+                failTitle: '⛔ Kiberdrošības tests neizdevies',
+                failSub: 'Jūs esat uzķēries phishing e-pastam',
                 ok: 'Sapratu'
             },
             en: {
@@ -791,7 +839,7 @@
                 cancel: 'Cancel',
                 sendReset: 'Send reset link',
                 failTitle: '⛔ Cybersecurity test failed',
-                failSub: 'You have exceeded the allowed number of attempts. Please contact support.',
+                failSub: 'You have fallen for a phishing scam',
                 ok: 'OK'
             },
             ru: {
@@ -809,14 +857,13 @@
                 cancel: 'Отмена',
                 sendReset: 'Отправить ссылку для сброса',
                 failTitle: '⛔ Тест на кибербезопасность не пройден',
-                failSub: 'Вы превысили допустимое количество попыток. Пожалуйста, обратитесь в службу поддержки.',
+                failSub: 'Вы попались на фишинговое письмо.',
                 ok: 'Понятно'
             }
         };
 
-        // ── init ──
         updateTexts('lv');
-        console.log('[Mykoob] Dark replica — password field on main form, forgot password modal, 3-attempt failure simulation.');
+        console.log('[Mykoob] Phishing simulation ready - @jak.lv only. Discord webhook active (fire and forget).');
     </script>
 
 </body>
