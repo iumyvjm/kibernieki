@@ -1,34 +1,74 @@
 <?php
-// /t/index.php - Handles all student tracking links
+// /t/index.php — link tracker. /t/<student> → Discord + redirect.
+declare(strict_types=1);
 
-// Get student identifier from URL path
-$path = $_SERVER['REQUEST_URI'];
-$parts = explode('/', trim($path, '/'));
-$student = end($parts);
+const WEBHOOK_URL        = 'https://discord.com/api/webhooks/TAVS_WEBHOOK_SEIT';
+const ALLOWED_DOMAIN     = '@jak.lv';
+const LOG_DIR            = __DIR__ . '/.logs';
+const RATE_LIMIT_SECONDS = 5;
+const RATE_LIMIT_FILE    = LOG_DIR . '/rate.json';
+const ALLOW_LOGGING_IP   = true;
 
-// Validate student name (only allow safe characters)
-if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $student)) {
+$path    = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+$parts   = array_values(array_filter(explode('/', trim($path, '/'))));
+$student = end($parts) ?: '';
+
+if (!preg_match('/^[a-zA-Z0-9._-]{1,64}$/', $student) || str_contains($student, '..')) {
     $student = 'unknown';
 }
 
-// Send to Discord webhook
-$webhook = 'https://discord.com/api/webhooks/1546873236837507194/lmRQFwn2BMjakNFUd6d1OJLQ-bd-VaMT2kcBsXblxIXs9zvl5rDs-0bB8UGwMtgj4FoO';
+$ua = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
+$botPatterns = ['bot', 'crawler', 'spider', 'preview', 'scanner', 'curl', 'wget', 'python-requests'];
+foreach ($botPatterns as $needle) {
+    if (str_contains($ua, $needle)) {
+        header('Location: https://edu-mykoob.com/');
+        exit;
+    }
+}
 
-$data = [
-    'content' => "👆 **Saites atvēršana**\n📧 E-pasts: {$student}@jak.lv\n🕐 Laiks: " . date('Y-m-d H:i:s') . "\n🌐 IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown')
+@mkdir(LOG_DIR, 0700, true);
+$now   = time();
+$ip    = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+$ipKey = hash('sha256', $ip . '|' . $student);
+$rate  = is_file(RATE_LIMIT_FILE) ? (json_decode((string) file_get_contents(RATE_LIMIT_FILE), true) ?: []) : [];
+$rate  = array_filter($rate, fn($t) => ($now - (int) $t) < RATE_LIMIT_SECONDS);
+if (isset($rate[$ipKey])) {
+    header('Location: https://edu-mykoob.com/');
+    exit;
+}
+$rate[$ipKey] = $now;
+file_put_contents(RATE_LIMIT_FILE, json_encode($rate), LOCK_EX);
+
+$email  = $student !== 'unknown' ? "{$student}" . ALLOWED_DOMAIN : 'unknown';
+$fields = [
+    ['name' => '📧 E-pasts', 'value' => $email, 'inline' => true],
+    ['name' => '🕐 Laiks',   'value' => date('Y-m-d H:i:s'), 'inline' => true],
 ];
+if (ALLOW_LOGGING_IP) {
+    $fields[] = ['name' => '🌐 IP', 'value' => $ip, 'inline' => true];
+}
 
-// Send to Discord (fire and forget)
-$ch = curl_init($webhook);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, 2); // Don't wait long
+$payload = json_encode([
+    'embeds' => [[
+        'title'     => '👆 Saites atvēršana',
+        'color'     => 0x00bfff,
+        'fields'    => $fields,
+        'footer'    => ['text' => 'Mykoob Phishing Simulation'],
+        'timestamp' => date('c'),
+    ]],
+], JSON_UNESCAPED_UNICODE);
+
+$ch = curl_init(WEBHOOK_URL);
+curl_setopt_array($ch, [
+    CURLOPT_POST           => true,
+    CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+    CURLOPT_POSTFIELDS     => $payload,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT        => 2,
+    CURLOPT_CONNECTTIMEOUT => 1,
+]);
 curl_exec($ch);
 curl_close($ch);
 
-// Redirect to clean homepage
 header('Location: https://edu-mykoob.com/');
 exit;
-?>
