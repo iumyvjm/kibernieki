@@ -2,7 +2,7 @@
 // /t/index.php — link tracker. /t/<student> → Discord + redirect.
 declare(strict_types=1);
 
-const WEBHOOK_URL        = 'https://discord.com/api/webhooks/TAVS_WEBHOOK_SEIT';
+const WEBHOOK_URL        = 'https://discord.com/api/webhooks/1547540540994621440/I295Pa8pLWiW3OzAbSUTbU-ad-prxpoXqJkeyQDCZF1xYjEZ0hNoz47Y8aQuDF_Bnk8w';
 const ALLOWED_DOMAIN     = '@jak.lv';
 const LOG_DIR            = __DIR__ . '/.logs';
 const RATE_LIMIT_SECONDS = 5;
