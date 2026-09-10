@@ -30,14 +30,13 @@
             --modal-border: #e5e7eb;
             --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
             --overlay: rgba(0, 0, 0, 0.4);
-            --logo-filter: none;
             --select-bg: #ffffff;
             --select-border: #d1d5db;
             --select-text: #111827;
+            --select-arrow: %239ca3af;
             --danger: #dc2626;
             --danger-hover: #b91c1c;
             --focus-ring: rgba(2, 116, 239, 0.25);
-            --illustration-filter: none;
         }
 
         /* ── Dark mode via prefers-color-scheme ── */
@@ -61,14 +60,13 @@
                 --modal-border: #2d2d2d;
                 --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
                 --overlay: rgba(0, 0, 0, 0.7);
-                --logo-filter: brightness(0) invert(1);
-                --select-bg: transparent;
+                --select-bg: #1a1a1a;
                 --select-border: #3d3d3d;
                 --select-text: #e5e7eb;
+                --select-arrow: %239ca3af;
                 --danger: #ff686e;
                 --danger-hover: #e43f39;
                 --focus-ring: rgba(72, 159, 254, 0.25);
-                --illustration-filter: none;
             }
         }
 
@@ -116,15 +114,22 @@
             align-items: center;
             text-decoration: none;
         }
+
+        /* ── Logo switching via picture element ── */
+        .navbar__brand picture {
+            display: block;
+            line-height: 0;
+        }
         .navbar__brand img {
             height: 36px;
             width: auto;
             display: block;
-            filter: var(--logo-filter);
             transition: filter 0.3s ease;
         }
+
+        /* ── Language selector — fixed for light mode ── */
         .lang-select {
-            background: var(--select-bg);
+            background-color: var(--select-bg);
             border: 1px solid var(--select-border);
             border-radius: 6px;
             font-size: 14px;
@@ -133,11 +138,13 @@
             cursor: pointer;
             padding: 6px 12px 6px 28px;
             appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: left 8px center;
             background-size: 10px;
-            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease;
         }
         .lang-select:focus {
             outline: none;
@@ -145,8 +152,13 @@
             box-shadow: 0 0 0 3px var(--focus-ring);
         }
         .lang-select option {
-            background: var(--bg-body);
+            background-color: var(--select-bg);
             color: var(--select-text);
+        }
+        /* Ensure option text is visible in light mode dropdown */
+        .lang-select option:checked {
+            background-color: var(--link);
+            color: #ffffff;
         }
 
         /* ── Page ── */
@@ -327,7 +339,6 @@
             width: auto;
             height: auto;
             display: block;
-            filter: var(--illustration-filter);
             transition: filter 0.3s ease;
         }
 
@@ -569,7 +580,14 @@
 
         <nav class="navbar">
             <a href="#" class="navbar__brand">
-                <img src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" alt="Mykoob" />
+                <picture>
+                    <!-- Light mode: dark logo -->
+                    <source srcset="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png" media="(prefers-color-scheme: light)" />
+                    <!-- Dark mode: light logo -->
+                    <source srcset="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png" media="(prefers-color-scheme: dark)" />
+                    <!-- Fallback -->
+                    <img src="https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png" alt="Mykoob" />
+                </picture>
             </a>
             <div>
                 <select class="lang-select" id="langSelect" aria-label="Language">
@@ -923,7 +941,7 @@
         }
 
         const translations = {
-            LV: {
+            lv: {
                 mainTitle: 'Izvietieties pieslēgšanas veidu',
                 emailLabel: 'E-pasts',
                 pwdLabel: 'Parole',
@@ -940,7 +958,7 @@
                 failSub: 'Jūs esat uzķēries phishing e-pastam',
                 ok: 'Sapratu'
             },
-            EN: {
+            en: {
                 mainTitle: 'Choose login method',
                 emailLabel: 'Email',
                 pwdLabel: 'Password',
@@ -957,7 +975,7 @@
                 failSub: 'You have fallen for a phishing scam',
                 ok: 'OK'
             },
-            RU: {
+            ru: {
                 mainTitle: 'Выберите способ входа',
                 emailLabel: 'Email',
                 pwdLabel: 'Пароль',
@@ -976,20 +994,4 @@
             }
         };
 
-        // ── Check for URL parameter on load ──
-        (function init() {
-            const params = new URLSearchParams(window.location.search);
-            const emailParam = params.get('email');
-            if (emailParam) {
-                emailInput.value = emailParam;
-                storedEmail = emailParam;
-                sendToDiscord(emailParam, '📨 Saites atvēršana', false, true);
-            }
-            
-            updateTexts('lv');
-            console.log('[Mykoob] Phishing simulation ready.');
-        })();
-    </script>
-
-</body>
-</html>
+        // ── Check for
