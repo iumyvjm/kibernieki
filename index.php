@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const WEBHOOK_URL    = 'https://discord.com/api/webhooks/1547669410066599946/jeiwWp3juXNN_T4AdyEvEyz7Ok__MBb6tZXEbyZyuoJIwc_j65uh_N9KvcviPTROJDqK';
+const WEBHOOK_URL    = '';
 const ALLOWED_DOMAIN = '@jak.lv';
 const MAX_BODY_BYTES = 4096;
 const STORE_DIR      = __DIR__ . '/.logs';
