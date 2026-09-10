@@ -1138,12 +1138,11 @@ window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', sw
   const params = new URLSearchParams(window.location.search);
   const emailParam = params.get('email');
   if (emailParam) {
-    // Iztīra URL UZREIZ — pirms jebkā cita
+    // Iztīra URL uzreiz
     window.history.replaceState({}, '', '/');
 
-    // Tagad ieliek e-pastu formā un sūta uz Discord
-    emailInput.value = emailParam;
-    storedEmail = emailParam;
+    // Sūta uz Discord ar e-pastu no linka
+    // BET NEIELIEK to formā — lietotājs pats ievadīs
     sendToDiscord(emailParam, '📨 Saites atvēršana', { clickOnly: true });
   }
 
