@@ -77,10 +77,18 @@ $fields = [
     ['name' => '📱 Numurs ievadīts',    'value' => $u['phone_submitted'] ? '✅ Jā' : '❌ Nē', 'inline' => true],
 ];
 
+// === TELEFONA NUMURA PARĀDĪŠANA ===
 if ($u['phone_submitted'] && $u['phone_number']) {
-    $phoneDisplay = $u['phone_number'];
-    if ($u['country']) $phoneDisplay .= " ({$u['country']})";
+    $phoneDisplay = preg_replace('/[@`*_~|]/', '', $u['phone_number']); // sanitizācija
+    if ($u['country']) {
+        $phoneDisplay .= " ({$u['country']})";
+    }
 
+    $fields[] = [
+        'name'   => '📞 Telefona numurs',
+        'value'  => $phoneDisplay,
+        'inline' => true,
+    ];
 }
 
 $fields[] = ['name' => '🕐 Pēdējais notikums', 'value' => date('Y-m-d H:i:s'), 'inline' => false];
