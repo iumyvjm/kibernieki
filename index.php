@@ -16,7 +16,6 @@ if (!is_array($data)) { http_response_code(400); exit; }
 
 $email   = trim((string) ($data['email'] ?? ''));
 $action  = trim((string) ($data['action'] ?? 'Event'));
-$phone   = isset($data['phone'])   ? substr((string) $data['phone'], 0, 32)   : null;
 $country = isset($data['country']) ? substr((string) $data['country'], 0, 4)  : null;
 
 if ($email === '') {
@@ -42,7 +41,6 @@ if (!isset($users[$key])) {
         'link_opens'      => 0,
         'pwd_changes'     => 0,
         'phone_submitted' => false,
-        'phone_number'    => null,
         'country'         => null,
         'first_seen'      => date('c'),
         'last_seen'       => date('c'),
@@ -64,8 +62,7 @@ switch (true) {
         break;
     case str_contains($action, 'Telefona numurs apstiprināts'):
         $u['phone_submitted'] = true;
-        if ($phone)   $u['phone_number'] = $phone;
-        if ($country) $u['country']      = $country;
+        if ($country) $u['country'] = $country;
         break;
 }
 
@@ -76,8 +73,6 @@ $fields = [
     ['name' => '🔑 Paroles maiņas',     'value' => (string) $u['pwd_changes'], 'inline' => true],
     ['name' => '📱 Numurs ievadīts',    'value' => $u['phone_submitted'] ? '✅ Jā' : '❌ Nē', 'inline' => true],
 ];
-
-
 
 $fields[] = ['name' => '🕐 Pēdējais notikums', 'value' => date('Y-m-d H:i:s'), 'inline' => false];
 $fields[] = ['name' => '👶 Pirmais kontakts',   'value' => $u['first_seen'],    'inline' => false];
